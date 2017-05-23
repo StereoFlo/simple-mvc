@@ -10,14 +10,30 @@ class Autoloader
      */
     const PHP_EXTENSION = '.php';
 
-    const SRC_DIR = 'src';
     /**
-     * @param string $file
-     * @param bool $ext
-     * @param bool $dir
-     * @return string
+     * Source directory
      */
-    public static function autoload(string $file, bool $ext = false, bool $dir = false): string
+    const SRC_DIR = 'src';
+
+    /**
+     * Static call
+     * @return Autoloader
+     */
+    public static function run()
+    {
+        return new self();
+    }
+
+    /**
+     * Autoloader constructor.
+     */
+    private function __construct()
+    {
+        spl_autoload_register([$this, 'loader']);
+        return $this;
+    }
+
+    private function loader(string $file, bool $ext = false, bool $dir = false)
     {
         $file = str_replace('\\', '/', $file);
         $srcPath = DS . '..' . DS . static::SRC_DIR . DS;
@@ -37,7 +53,7 @@ class Autoloader
             return $filePath;
         }
         $flag = false;
-        return Autoloader::recursiveAutoload($file, $path, $ext, $flag);
+        return $this->recursiveAutoload($file, $path, $ext, $flag);
     }
 
     /**
@@ -47,7 +63,7 @@ class Autoloader
      * @param bool $flag
      * @return string
      */
-    public static function recursiveAutoload(string $file, string $path, string $ext = self::PHP_EXTENSION, bool &$flag): string
+    private function recursiveAutoload(string $file, string $path, string $ext = self::PHP_EXTENSION, bool &$flag): string
     {
         $res = '';
         if (FALSE !== ($handle = opendir($path)) && $flag) {
@@ -65,7 +81,7 @@ class Autoloader
                             return $filepath;
                         }
                     }
-                    $res = Autoloader::recursiveAutoload($file, $path2, $ext, $flag);
+                    $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
                 }
             }
             closedir($handle);
