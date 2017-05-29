@@ -52,7 +52,7 @@ class ClassicRouter
         $params = static::$params;
         $res = self::callController($controller, $method, $params);
         if (!$res) {
-           \Application::error404();
+           Response::error404();
 
             return false;
         }
