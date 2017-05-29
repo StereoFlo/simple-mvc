@@ -1,19 +1,110 @@
 <?php
-
 use Core\ApiController;
 use Core\ClassicRouter;
 use Core\Logger;
+use Core\Response;
 
 /**
- * Class Application
+ * Class Autoloader
  */
 class Application
 {
     /**
+     * default php extension
+     */
+    const PHP_EXTENSION = '.php';
+
+    /**
+     * Source directory
+     */
+    const SRC_DIR = 'src';
+
+    /**
+     * Static call
+     *
+     * @param int $mode
+     * @param     $params
+     *
+     * @return Application
+     */
+    public static function run(int $mode, $params)
+    {
+        return new self($mode, $params);
+    }
+
+    /**
+     * Autoloader constructor.
+     *
+     * @param int $mode
+     * @param     $params
+     */
+    private function __construct(int $mode, $params)
+    {
+        spl_autoload_register([$this, 'loader']);
+        $this->go($mode, $params);
+        return $this;
+    }
+
+    private function loader(string $file, bool $ext = false, bool $dir = false)
+    {
+        $file = str_replace('\\', '/', $file);
+        $srcPath = DS . '..' . DS . static::SRC_DIR . DS;
+        if ($ext === false) {
+            $path = $_SERVER['DOCUMENT_ROOT'] . $srcPath;
+            $filePath = $path . $file . static::PHP_EXTENSION;
+        } else {
+            $path = $_SERVER['DOCUMENT_ROOT'] . (($dir) ? $srcPath . $dir : '');
+            $filePath = $path . DS . $file . '.' . $ext;
+        }
+
+        if (file_exists($filePath)) {
+            if (false === $ext) {
+                require_once($filePath);
+                return '';
+            }
+            return $filePath;
+        }
+        $flag = false;
+        return $this->recursiveAutoload($file, $path, $ext, $flag);
+    }
+
+    /**
+     * @param string $file
+     * @param string $path
+     * @param string $ext
+     * @param bool $flag
+     * @return string
+     */
+    private function recursiveAutoload(string $file, string $path, string $ext = self::PHP_EXTENSION, bool &$flag): string
+    {
+        $res = '';
+        if (FALSE !== ($handle = opendir($path)) && $flag) {
+            while (FAlSE !== ($dir = readdir($handle)) && $flag) {
+
+                if (strpos($dir, '.') === FALSE) {
+                    $path2 = $path . DIRECTORY_SEPARATOR . $dir;
+                    $filepath = $path2 . DIRECTORY_SEPARATOR . $file . $ext;
+                    if (file_exists($filepath)) {
+                        $flag = FALSE;
+                        if ($ext === FALSE) {
+                            require_once($filepath);
+                            break;
+                        } else {
+                            return $filepath;
+                        }
+                    }
+                    $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
+                }
+            }
+            closedir($handle);
+        }
+        return $res;
+    }
+    /**
      * Modes
      */
     const MODE_API = 1,
-          MODE_WEB = 2;
+        MODE_WEB = 2;
 
     /**
      * @param int   $mode
@@ -21,7 +112,7 @@ class Application
      *
      * @return mixed
      */
-    public static function run(int $mode, $params)
+    private function go(int $mode, $params)
     {
         try {
             switch ($mode) {
@@ -35,31 +126,13 @@ class Application
             }
         } catch (Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
-            self::error503();
+            Response::error503();
             return false;
         } catch (Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            self::error503();
+            Response::error503();
             return false;
         }
-    }
-
-    /**
-     * 404 error
-     */
-    public static function error404()
-    {
-        header("HTTP/1.0 404 Not Found");
-    }
-
-    /**
-     * 503 error
-     */
-    public static function error503()
-    {
-        header('HTTP/1.1 503 Service Temporarily Unavailable');
-        header('Status: 503 Service Temporarily Unavailable');
-        header('Retry-After: 300');
     }
 
     /**

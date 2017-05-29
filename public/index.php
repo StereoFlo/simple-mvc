@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../src/Autoloader.php';
+require_once __DIR__ . '/../src/Application.php';
 define('DS', DIRECTORY_SEPARATOR);
-\spl_autoload_register('Autoloader::autoload');
-Application::run(Application::MODE_WEB, $_SERVER['PATH_INFO']);
+Application::run(Application::MODE_WEB, $_SERVER['REQUEST_URI']);
