@@ -68,7 +68,7 @@ class ClassicRouter
      *
      * @return mixed
      */
-    private static function call(string $controller, string $method, array $data, int $args = 0)
+    private static function call(string $controller, string $method, array $data = [], int $args = 0)
     {
         for ($i = 0; $i < $args; $i++) {
             unset($data[$i]);
