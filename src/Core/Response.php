@@ -8,7 +8,10 @@
 
 namespace Core;
 
-
+/**
+ * Class Response
+ * @package Core
+ */
 class Response
 {
     /**
@@ -28,4 +31,13 @@ class Response
         header('Status: 503 Service Temporarily Unavailable');
         header('Retry-After: 300');
     }
+
+    /**
+     * 503 error
+     */
+    public static function error400()
+    {
+        header('HTTP/1.1 400 BAD REQUEST');
+    }
+
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace Core;
+
 /**
  * Class Config
  */
@@ -17,7 +18,7 @@ class Config
      * @param string $key
      * @return array
      */
-    public static function getConfig(string $configName, string $key = null)
+    public static function getConfig(string $configName, string $key = null): array
     {
         self::$configName = $configName;
         $fullPath = static::$configPath . DIRECTORY_SEPARATOR . $configName . '.' . static::$phpExtension;
@@ -32,6 +33,11 @@ class Config
         return [];
     }
 
+    /**
+     * @param string|null $key
+     *
+     * @return mixed
+     */
     private static function getFromConfig(string $key = null)
     {
         if ($key && isset(self::$config[self::$configName][$key])) {

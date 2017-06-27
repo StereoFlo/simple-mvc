@@ -1,8 +1,8 @@
 <?php
 use Core\ApiController;
-use Core\ClassicRouter;
 use Core\Logger;
 use Core\Response;
+use Core\Router;
 
 /**
  * Class Autoloader
@@ -23,28 +23,32 @@ class Application
      * Static call
      *
      * @param int $mode
-     * @param     $params
-     *
      * @return Application
      */
-    public static function run(int $mode, $params)
+    public static function run(int $mode)
     {
-        return new self($mode, $params);
+        return new self($mode);
     }
 
     /**
      * Autoloader constructor.
      *
      * @param int $mode
-     * @param     $params
      */
-    private function __construct(int $mode, $params)
+    private function __construct(int $mode)
     {
         spl_autoload_register([$this, 'loader']);
-        $this->go($mode, $params);
+        $this->go($mode);
         return $this;
     }
 
+    /**
+     * @param string $file
+     * @param bool   $ext
+     * @param bool   $dir
+     *
+     * @return string
+     */
     private function loader(string $file, bool $ext = false, bool $dir = false)
     {
         $file = str_replace('\\', '/', $file);
@@ -108,20 +112,19 @@ class Application
 
     /**
      * @param int   $mode
-     * @param mixed $params
      *
      * @return mixed
      */
-    private function go(int $mode, $params)
+    private function go(int $mode)
     {
         try {
             switch ($mode) {
                 case self::MODE_API:
-                    return ApiController::respond(self::getRouter($params));
+                    return ApiController::respond(self::getRouter());
                     break;
                 case self::MODE_WEB:
                 default:
-                    return self::getRouter($params);
+                    return self::getRouter();
                     break;
             }
         } catch (Exception $e) {
@@ -136,12 +139,10 @@ class Application
     }
 
     /**
-     * @param $params
-     *
      * @return mixed
      */
-    private static function getRouter($params)
+    private static function getRouter()
     {
-        return ClassicRouter::init($params);
+        return Router::create($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
     }
 }
