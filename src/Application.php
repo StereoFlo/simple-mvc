@@ -42,6 +42,13 @@ class Application
         return $this;
     }
 
+    /**
+     * @param string $file
+     * @param bool   $ext
+     * @param bool   $dir
+     *
+     * @return string
+     */
     private function loader(string $file, bool $ext = false, bool $dir = false)
     {
         $file = str_replace('\\', '/', $file);
@@ -136,6 +143,6 @@ class Application
      */
     private static function getRouter()
     {
-        return Router::init();
+        return Router::create($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
     }
 }

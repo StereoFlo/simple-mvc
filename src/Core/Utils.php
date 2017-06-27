@@ -1,16 +1,28 @@
 <?php
-/**
- * File:    Utils.php
- * Project: framework
- * User:    evgen
- * Date:    16.05.17
- * Time:    10:00
- */
 
 namespace Core;
 
-
+/**
+ * Class Utils
+ * @package Core
+ */
 class Utils
 {
-    //todo
+    /**
+     * @param      $data
+     * @param      $key
+     * @param null $default
+     *
+     * @return mixed|null
+     */
+    public static function getProperty($data, $key, $default = null)
+    {
+        if (is_array($data) && array_key_exists($key, $data)) {
+            return $data[$key];
+        }
+        if (is_object($data) && isset($data->{$key})) {
+            return $data->{$key};
+        }
+        return $default;
+    }
 }
