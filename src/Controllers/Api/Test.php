@@ -13,6 +13,6 @@ class Test extends ApiController
 
     public static function index()
     {
-        return ['test' => 'value'];
+        return self::respond(['test' => 'value']);
     }
 }
