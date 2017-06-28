@@ -22,12 +22,11 @@ class Application
     /**
      * Static call
      *
-     * @param int $mode
      * @return Application
      */
-    public static function run(int $mode)
+    public static function run()
     {
-        return new self($mode);
+        return new self();
     }
 
     /**
@@ -85,14 +84,14 @@ class Application
 
                 if (strpos($dir, '.') === FALSE) {
                     $path2 = $path . DIRECTORY_SEPARATOR . $dir;
-                    $filepath = $path2 . DIRECTORY_SEPARATOR . $file . $ext;
-                    if (file_exists($filepath)) {
+                    $filePath = $path2 . DIRECTORY_SEPARATOR . $file . $ext;
+                    if (file_exists($filePath)) {
                         $flag = FALSE;
                         if ($ext === FALSE) {
-                            require_once($filepath);
+                            require_once($filePath);
                             break;
                         } else {
-                            return $filepath;
+                            return $filePath;
                         }
                     }
                     $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
