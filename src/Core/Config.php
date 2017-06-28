@@ -7,10 +7,19 @@ namespace Core;
  */
 class Config
 {
+    /**
+     * @var string
+     */
     private static $configPath = '../config';
-    private static $phpExtension = 'php';
 
+    /**
+     * @var array
+     */
     private static $config = [];
+
+    /**
+     * @var string
+     */
     private static $configName = '';
 
     /**
@@ -20,17 +29,18 @@ class Config
      */
     public static function getConfig(string $configName, string $key = null)
     {
-        self::$configName = $configName;
-        $fullPath = static::$configPath . DIRECTORY_SEPARATOR . $configName . '.' . static::$phpExtension;
-        if (file_exists($fullPath)) {
-            if (isset(static::$config[self::$configName])) {
-                return self::getFromConfig($key);
+        if (!isset(static::$config[$configName])) {
+            static::$configName = $configName;
+            $fullPath = static::$configPath . DIRECTORY_SEPARATOR . static::$configName . \Application::PHP_EXTENSION;
+            if (!file_exists($fullPath)) {
+                return [];
             }
-            self::$configName = $configName;
-            self::$config[$configName] = require_once $fullPath;
-            return self::getFromConfig($key);
+            static::$config[$configName] = require_once $fullPath;
         }
-        return [];
+        if (!$key) {
+            return static::$config[$configName];
+        }
+        return self::getFromConfig($key);
     }
 
     /**
@@ -40,9 +50,9 @@ class Config
      */
     private static function getFromConfig(string $key = null)
     {
-        if ($key && isset(self::$config[self::$configName][$key])) {
-            return self::$config[self::$configName][$key];
+        if (!$key && !isset(self::$config[self::$configName][$key])) {
+            return false;
         }
-        return self::$config[self::$configName];
+        return self::$config[self::$configName][$key];
     }
 }

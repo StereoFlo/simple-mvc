@@ -20,6 +20,12 @@ class Application
     const SRC_DIR = 'src';
 
     /**
+     * Modes
+     */
+    const MODE_API = 1,
+          MODE_WEB = 2;
+
+    /**
      * Static call
      *
      * @return Application
@@ -50,7 +56,7 @@ class Application
     {
         $file = str_replace('\\', '/', $file);
         $srcPath = DS . '..' . DS . static::SRC_DIR . DS;
-        if ($ext === false) {
+        if (false === $ext) {
             $path = $_SERVER['DOCUMENT_ROOT'] . $srcPath;
             $filePath = $path . $file . static::PHP_EXTENSION;
         } else {
@@ -82,12 +88,12 @@ class Application
         if (FALSE !== ($handle = opendir($path)) && $flag) {
             while (FAlSE !== ($dir = readdir($handle)) && $flag) {
 
-                if (strpos($dir, '.') === FALSE) {
+                if (FALSE === strpos($dir, '.')) {
                     $path2 = $path . DIRECTORY_SEPARATOR . $dir;
                     $filePath = $path2 . DIRECTORY_SEPARATOR . $file . $ext;
                     if (file_exists($filePath)) {
                         $flag = FALSE;
-                        if ($ext === FALSE) {
+                        if (FALSE === $ext) {
                             require_once($filePath);
                             break;
                         } else {
@@ -101,11 +107,6 @@ class Application
         }
         return $res;
     }
-    /**
-     * Modes
-     */
-    const MODE_API = 1,
-          MODE_WEB = 2;
 
     /**
      * @return mixed
