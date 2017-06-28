@@ -19,6 +19,11 @@ class Router
     private $route = '';
 
     /**
+     * @var string
+     */
+    private $mode = 0;
+
+    /**
      * @var array
      */
     private $config = [];
@@ -39,6 +44,8 @@ class Router
      *
      * @param string $method
      * @param string $route
+     *
+     * @return Router
      */
     private function __construct(string $method, string $route)
     {
@@ -52,6 +59,14 @@ class Router
         }
         $this->run();
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMode(): int
+    {
+        return $this->mode;
     }
 
     /**
@@ -77,6 +92,7 @@ class Router
             Response::error404();
             return false;
         }
+        $this->mode = Utils::getProperty($route, 'mode', '');
         $method = Utils::getProperty($route, 'method', '');
         if ($this->method !== strtoupper($method)) {
             Response::error400();
@@ -87,7 +103,7 @@ class Router
             Response::error503();
             return false;
         }
-        $namespace = $this->config['controllersNamespace'] . '\\' . $route['controller'];
+        $namespace = $this->config['controllersNamespace'] . '\\' . $this->prepareForNs($route['controller']);
         if (!is_callable($namespace, $route['action'])) {
             Response::error503();
             return false;
@@ -96,5 +112,14 @@ class Router
             return call_user_func_array([$namespace, $route['action']], $params);
         }
         return call_user_func([$namespace, $route['action']]);
+    }
+    /**
+     * @param string $controller
+     *
+     * @return string
+     */
+    private function prepareForNs(string $controller): string
+    {
+        return str_replace("/", "\\", $controller);
     }
 }

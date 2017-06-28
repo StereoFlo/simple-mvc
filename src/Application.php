@@ -1,5 +1,5 @@
 <?php
-use Core\ApiController;
+
 use Core\Logger;
 use Core\Response;
 use Core\Router;
@@ -32,13 +32,11 @@ class Application
 
     /**
      * Autoloader constructor.
-     *
-     * @param int $mode
      */
-    private function __construct(int $mode)
+    private function __construct()
     {
         spl_autoload_register([$this, 'loader']);
-        $this->go($mode);
+        $this->go();
         return $this;
     }
 
@@ -108,25 +106,15 @@ class Application
      * Modes
      */
     const MODE_API = 1,
-        MODE_WEB = 2;
+          MODE_WEB = 2;
 
     /**
-     * @param int   $mode
-     *
      * @return mixed
      */
-    private function go(int $mode)
+    private function go()
     {
         try {
-            switch ($mode) {
-                case self::MODE_API:
-                    return ApiController::respond(self::getRouter());
-                    break;
-                case self::MODE_WEB:
-                default:
-                    return self::getRouter();
-                    break;
-            }
+            return self::getRouter();
         } catch (Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
             Response::error503();
@@ -139,7 +127,7 @@ class Application
     }
 
     /**
-     * @return mixed
+     * @return Router
      */
     private static function getRouter()
     {

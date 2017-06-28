@@ -16,9 +16,9 @@ class Config
     /**
      * @param string $configName
      * @param string $key
-     * @return array
+     * @return mixed
      */
-    public static function getConfig(string $configName, string $key = null): array
+    public static function getConfig(string $configName, string $key = null)
     {
         self::$configName = $configName;
         $fullPath = static::$configPath . DIRECTORY_SEPARATOR . $configName . '.' . static::$phpExtension;

@@ -8,17 +8,19 @@ return [
         'method' => 'get',
         'controller' => 'index',
         'action' => 'index',
-        'params' => null,
+        'mode'   => Application::MODE_WEB,
     ],
     '/^\/test\/(.*)\/(.*)\/(.*)$/i' => [
         'method' => 'get',
         'controller' => 'index',
         'action' => 'test',
-        'params' => [
-            '$1',
-            '$2',
-            '$3',
-        ],
-    ]
+        'mode'   => Application::MODE_WEB,
+    ],
+    '/^\/api\/test$/i' => [
+        'method' => 'get',
+        'controller' => 'Api/Test',
+        'action' => 'index',
+        'mode'   => Application::MODE_API,
+    ],
 
 ];
