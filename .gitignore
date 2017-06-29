@@ -2,3 +2,5 @@
 .idea/
 tmp/sessions/*
 tmp/log/*
+*~
+.DS_Store
