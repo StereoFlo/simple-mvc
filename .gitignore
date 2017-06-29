@@ -1,6 +1,6 @@
 .gitignore
 .idea/
-tmp/sessions/*
-tmp/log/*
+tmp/sessions/sess_*
+tmp/log/*.log
 *~
 .DS_Store
