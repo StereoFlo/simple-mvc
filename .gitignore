@@ -1,2 +1,4 @@
 .gitignore
 .idea/
+tmp/sessions/*
+tmp/log/*
