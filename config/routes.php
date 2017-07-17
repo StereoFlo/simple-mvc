@@ -10,7 +10,7 @@ return [
         'action' => 'index',
         'mode'   => Application::MODE_WEB,
     ],
-    '/^\/test\/(.*)\/(.*)\/(.*)$/i' => [
+    '/^\/test\/(.\d+)\/(.\d+)\/(.\d+)(\/)?$/i' => [
         'method' => 'get',
         'controller' => 'index',
         'action' => 'test',
