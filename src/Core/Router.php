@@ -75,7 +75,7 @@ class Router
     private function run()
     {
         $routes = Config::getConfig('routes');
-        if ($routes) {
+        if (empty($routes)) {
             Response::error503();
             return false;
         }
