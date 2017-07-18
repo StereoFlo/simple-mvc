@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use App\Utils;
+
 /**
  * Class Router
  * @package Core
@@ -54,7 +56,7 @@ class Router
         $router = Config::getConfig('router');
         $main = Config::getConfig('main');
         $this->config = $router + $main;
-        if (preg_match($router['staticFileExtensions'], $route)) {
+        if (preg_match(Utils::getProperty($router, 'staticFileExtensions'), $route)) {
             return $this;
         }
         $this->run();
@@ -90,13 +92,13 @@ class Router
             Response::error400();
             return false;
         }
-        $path = Utils::getProperty($this->config, 'srcDir') . DS . $this->prepareForPath(Utils::getProperty($route, 'controller')) . Utils::getProperty($this->config, 'extension');
+        $path = $this->getControllerPath(Utils::getProperty($route, 'controller'));
         if (!file_exists($path)) {
             Response::error503();
             return false;
         }
-        $namespace = $this->prepareForNs($route['controller']);
-        if (!is_callable($namespace, $route['action'])) {
+        $namespace = $this->getControllerNamespace(Utils::getProperty($route, 'controller'));
+        if (!is_callable($namespace, Utils::getProperty($route, 'action'))) {
             Response::error503();
             return false;
         }
@@ -142,5 +144,27 @@ class Router
             }
         }
         return [$route, $params];
+    }
+
+    /**
+     * @param string $controller
+     *
+     * @return string
+     */
+    private function getControllerPath(string $controller): string
+    {
+        $path = Utils::getProperty($this->config, 'srcDir') . DS . $this->prepareForPath($controller) . Utils::getProperty($this->config, 'extension');
+        return $path;
+    }
+
+    /**
+     * @param string $controller
+     *
+     * @return string
+     */
+    private function getControllerNamespace(string $controller): string
+    {
+        $namespace = $this->prepareForNs($controller);
+        return $namespace;
     }
 }

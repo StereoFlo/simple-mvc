@@ -6,7 +6,7 @@ namespace Core;
  * Class Input
  * @package Core
  */
-class Input
+class Request
 {
     /**
      * @param string|null $key
