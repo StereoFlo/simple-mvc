@@ -75,7 +75,7 @@ class Router
     private function run()
     {
         $routes = Config::getConfig('routes');
-        if ($routes) {
+        if (empty($routes)) {
             Response::error503();
             return false;
         }
@@ -90,12 +90,12 @@ class Router
             Response::error400();
             return false;
         }
-        $path = Utils::getProperty($this->config, 'controllersDir') . DS . Utils::getProperty($route, 'controller') . Utils::getProperty($this->config, 'extension');
+        $path = Utils::getProperty($this->config, 'srcDir') . DS . $this->prepareForPath(Utils::getProperty($route, 'controller')) . Utils::getProperty($this->config, 'extension');
         if (!file_exists($path)) {
             Response::error503();
             return false;
         }
-        $namespace = Utils::getProperty($this->config, 'controllersNamespace') . '\\' . $this->prepareForNs($route['controller']);
+        $namespace = $this->prepareForNs($route['controller']);
         if (!is_callable($namespace, $route['action'])) {
             Response::error503();
             return false;
@@ -106,13 +106,23 @@ class Router
         return call_user_func([$namespace, Utils::getProperty($route, 'action')]);
     }
     /**
-     * @param string $controller
+     * @param string $what
      *
      * @return string
      */
-    private function prepareForNs(string $controller): string
+    private function prepareForNs(string $what): string
     {
-        return str_replace("/", "\\", $controller);
+        return str_replace("/", "\\", $what);
+    }
+
+    /**
+     * @param string $what
+     *
+     * @return string
+     */
+    private function prepareForPath(string $what): string
+    {
+        return str_replace('\\', '/', $what);
     }
 
     /**
