@@ -10,7 +10,6 @@ use Core\ApiController;
  */
 class Test extends ApiController
 {
-
     public static function index()
     {
         return self::respond(['test' => 'value']);

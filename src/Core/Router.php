@@ -59,8 +59,7 @@ class Router
         if (preg_match(Utils::getProperty($router, 'staticFileExtensions'), $route)) {
             return $this;
         }
-        $this->run();
-        return $this;
+        return $this->run();
     }
 
     /**
