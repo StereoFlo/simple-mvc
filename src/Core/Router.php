@@ -31,6 +31,11 @@ class Router
     private $config = [];
 
     /**
+     * @var null answer from controller
+     */
+    private static $out;
+
+    /**
      * @param string $method
      * @param string $route
      *
@@ -60,6 +65,14 @@ class Router
             return $this;
         }
         return $this->run();
+    }
+
+    /**
+     * @return null
+     */
+    public static function getOut()
+    {
+        return self::$out;
     }
 
     /**
@@ -101,11 +114,25 @@ class Router
             Response::error503();
             return false;
         }
-        if (!empty($params)) {
-            return call_user_func_array([$namespace, Utils::getProperty($route, 'action')], $params);
+        if (empty($params)) {
+            static::$out = $this->call([$namespace, Utils::getProperty($route, 'action')], $params);
+            return true;
         }
-        return call_user_func([$namespace, Utils::getProperty($route, 'action')]);
+        static::$out = $this->call([$namespace, Utils::getProperty($route, 'action')], $params);
+        return true;
     }
+
+    /**
+     * @param array $callback
+     * @param array $args
+     *
+     * @return mixed
+     */
+    private function call($callback = [], $args = [])
+    {
+        return call_user_func_array($callback, $args);
+    }
+
     /**
      * @param string $what
      *

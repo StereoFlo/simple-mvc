@@ -1,5 +1,7 @@
 <?php
 
+use App\Boot\Api;
+use App\Boot\Web;
 use Core\Logger;
 use Core\Response;
 use Core\Router;
@@ -104,7 +106,18 @@ class Application
     private function go()
     {
         try {
-            return self::getRouter();
+            $router = self::getRouter();
+            switch ($router->getMode()) {
+                case self::MODE_WEB:
+                    return Web::run($router->getOut());
+                    break;
+                case self::MODE_API:
+                    return Api::run($router->getOut());
+                    break;
+                default:
+                    Response::error503();
+                    break;
+            }
         } catch (Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
             Response::error503();
@@ -114,6 +127,7 @@ class Application
             Response::error503();
             return false;
         }
+        return false;
     }
 
     /**
