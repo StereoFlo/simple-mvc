@@ -1,5 +1,7 @@
 <?php
 
+use App\Boot\Api;
+use App\Boot\Web;
 use Core\Logger;
 use Core\Response;
 use Core\Router;
@@ -41,8 +43,7 @@ class Application
     private function __construct()
     {
         spl_autoload_register([$this, 'loader']);
-        $this->go();
-        return $this;
+        return $this->go();
     }
 
     /**
@@ -55,24 +56,17 @@ class Application
     private function loader(string $file, bool $ext = false, bool $dir = false)
     {
         $file = str_replace('\\', '/', $file);
-        $srcPath = DS . '..' . DS . static::SRC_DIR . DS;
-        if (false === $ext) {
-            $path = $_SERVER['DOCUMENT_ROOT'] . $srcPath;
-            $filePath = $path . $file . static::PHP_EXTENSION;
-        } else {
-            $path = $_SERVER['DOCUMENT_ROOT'] . (($dir) ? $srcPath . $dir : '');
-            $filePath = $path . DS . $file . '.' . $ext;
-        }
+        list($path, $filePath) = $this->getPaths($file, $ext, $dir);
 
-        if (file_exists($filePath)) {
-            if (false === $ext) {
-                require_once($filePath);
-                return '';
-            }
-            return $filePath;
+        if (!file_exists($filePath)) {
+            $flag = false;
+            return $this->recursiveAutoload($file, $path, $ext, $flag);
         }
-        $flag = false;
-        return $this->recursiveAutoload($file, $path, $ext, $flag);
+        if (false === $ext) {
+            require_once($filePath);
+            return '';
+        }
+        return $filePath;
     }
 
     /**
@@ -85,22 +79,20 @@ class Application
     private function recursiveAutoload(string $file, string $path, string $ext = self::PHP_EXTENSION, bool &$flag): string
     {
         $res = '';
-        if (FALSE !== ($handle = opendir($path)) && $flag) {
-            while (FAlSE !== ($dir = readdir($handle)) && $flag) {
-
-                if (FALSE === strpos($dir, '.')) {
+        if (false !== ($handle = opendir($path)) && $flag) {
+            while (false !== ($dir = readdir($handle)) && $flag) {
+                if (false === strpos($dir, '.')) {
                     $path2 = $path . DIRECTORY_SEPARATOR . $dir;
                     $filePath = $path2 . DIRECTORY_SEPARATOR . $file . $ext;
-                    if (file_exists($filePath)) {
-                        $flag = FALSE;
-                        if (FALSE === $ext) {
-                            require_once($filePath);
-                            break;
-                        } else {
-                            return $filePath;
-                        }
+                    if (!file_exists($filePath)) {
+                        $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
                     }
-                    $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
+                    $flag = false;
+                    if (false === $ext) {
+                        require_once($filePath);
+                        break;
+                    }
+                    return $filePath;
                 }
             }
             closedir($handle);
@@ -114,7 +106,18 @@ class Application
     private function go()
     {
         try {
-            return self::getRouter();
+            $router = self::getRouter();
+            switch ($router->getMode()) {
+                case self::MODE_WEB:
+                    return Web::run($router->getOut());
+                    break;
+                case self::MODE_API:
+                    return Api::run($router->getOut());
+                    break;
+                default:
+                    Response::error503();
+                    break;
+            }
         } catch (Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
             Response::error503();
@@ -124,6 +127,7 @@ class Application
             Response::error503();
             return false;
         }
+        return false;
     }
 
     /**
@@ -132,5 +136,25 @@ class Application
     private static function getRouter()
     {
         return Router::create($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+    }
+
+    /**
+     * @param string $file
+     * @param bool   $ext
+     * @param bool   $dir
+     *
+     * @return array
+     */
+    private function getPaths(string $file, bool $ext, bool $dir): array
+    {
+        $srcPath = DS . '..' . DS . static::SRC_DIR . DS;
+        if (false === $ext) {
+            $path = $_SERVER['DOCUMENT_ROOT'] . $srcPath;
+            $filePath = $path . $file . static::PHP_EXTENSION;
+            return [$path, $filePath];
+        }
+        $path = $_SERVER['DOCUMENT_ROOT'] . (($dir) ? $srcPath . $dir : '');
+        $filePath = $path . DS . $file . '.' . $ext;
+        return [$path, $filePath];
     }
 }
