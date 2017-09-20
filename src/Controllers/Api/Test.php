@@ -3,6 +3,7 @@
 namespace Controllers\Api;
 
 use Core\ApiController;
+use Models\TestModel;
 
 /**
  * Class Index
@@ -12,6 +13,6 @@ class Test extends ApiController
 {
     public static function index()
     {
-        return ['test', 'hbcuerh'];
+        return TestModel::create()->getMedia();
     }
 }
