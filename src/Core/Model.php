@@ -164,17 +164,17 @@ class Model extends \mysqli
      */
     public function rawQuery(string $query, $bindParams = null): array
     {
-        $this->query = filter_var($query, FILTER_SANITIZE_STRING);
+        $this->query = \filter_var($query, FILTER_SANITIZE_STRING);
         //html entities added by filter have to be decoded or statement prepare will break
-        $this->query = html_entity_decode($this->query);
+        $this->query = \html_entity_decode($this->query);
 
-        if (is_array($bindParams)) {
+        if (\is_array($bindParams)) {
             $params = ['']; // Create the empty 0 index
             foreach ($bindParams as $prop => $val) {
                 $params[0] .= $this->determineType($val);
-                array_push($params, $bindParams[$prop]);
+                \array_push($params, $bindParams[$prop]);
             }
-            call_user_func_array([$this->stmt, 'bind_param'], $this->refValues($params));
+            \call_user_func_array([$this->stmt, 'bind_param'], $this->refValues($params));
         }
         $this->processQuery();
         return $this->db_result;
@@ -189,8 +189,8 @@ class Model extends \mysqli
      */
     public function query($query, $resultMode = MYSQLI_STORE_RESULT): array
     {
-        $this->query = filter_var($query, FILTER_SANITIZE_STRING);
-        $this->query = html_entity_decode($this->query);
+        $this->query = \filter_var($query, FILTER_SANITIZE_STRING);
+        $this->query = \html_entity_decode($this->query);
         $this->processQuery();
         return $this->db_result;
     }
@@ -205,8 +205,8 @@ class Model extends \mysqli
      */
     public function get(string $tableName, $columns = '*'): array
     {
-        $columns = is_array($columns) ? $columns : $this->multiExplode($columns, ',');
-        $columns = implode(', ', $columns);
+        $columns = \is_array($columns) ? $columns : $this->multiExplode($columns, ',');
+        $columns = \implode(', ', $columns);
         $this->query = 'SELECT ' . $columns . ' FROM ' . $this->db_prefix . $tableName;
         $this->processQuery();
         return $this->db_result;
@@ -222,7 +222,7 @@ class Model extends \mysqli
      */
     public function getOne(string $tableName, $columns = '*')
     {
-        $column = is_array($columns) ? implode(', ', $columns) : $columns;
+        $column = \is_array($columns) ? \implode(', ', $columns) : $columns;
         $this->query = 'SELECT ' . $column . ' FROM ' . $this->db_prefix . $tableName;
         $this->limit(1);
         $this->processQuery();
@@ -245,10 +245,10 @@ class Model extends \mysqli
      */
     public function getCol(string $tableName, $column)
     {
-        $column = is_array($column) ? array_shift($column) : $column;
+        $column = \is_array($column) ? \array_shift($column) : $column;
         $this->get($tableName, $column);
         $new_array = [];
-        if (is_array($this->db_result) && !empty($this->db_result)) {
+        if (\is_array($this->db_result) && !empty($this->db_result)) {
             // Extract the column values
             foreach ($this->db_result as $result) {
                 $new_array[] = $result->{$column};
@@ -268,12 +268,12 @@ class Model extends \mysqli
      */
     public function getVar(string $tableName, $columns = '*')
     {
-        $column = is_array($columns) ? implode(', ', $columns) : $columns;
+        $column = \is_array($columns) ? \implode(', ', $columns) : $columns;
         $this->query = 'SELECT ' . $column . ' FROM ' . $this->db_prefix . $tableName;
         $this->limit(1);
         $this->output('array');
         $this->processQuery();
-        if (is_array($this->db_result) && !empty($this->db_result)) {
+        if (\is_array($this->db_result) && !empty($this->db_result)) {
             $this->db_result = $this->db_result[0][$column];
         }
         return $this->db_result;
@@ -337,7 +337,7 @@ class Model extends \mysqli
         {
             $this->setLastError($this->sqlstate . ' ' . $this->error);
             $this->db_result = false;
-            trigger_error("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
+            \trigger_error("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
         }
         $this->dynamicBindResults();
         $this->reset();
@@ -385,10 +385,10 @@ class Model extends \mysqli
     public function join(string $joinTable, string $joinCondition, string $joinType = ''): self
     {
         $allowedTypes = ['LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER'];
-        $joinType = strtoupper(trim($joinType));
+        $joinType = \strtoupper(trim($joinType));
         $joinTable = filter_var($joinTable, FILTER_SANITIZE_STRING);
 
-        if ($joinType && !in_array($joinType, $allowedTypes))
+        if ($joinType && !\in_array($joinType, $allowedTypes))
             throw new \Exception('Wrong JOIN type: ' . $joinType);
 
         $this->join[$joinType . " JOIN " . $this->db_prefix . $joinTable] = $joinCondition;
@@ -431,7 +431,7 @@ class Model extends \mysqli
      */
     public function groupBy($groupByField): self
     {
-        $groupByField = filter_var($groupByField, FILTER_SANITIZE_STRING);
+        $groupByField = \filter_var($groupByField, FILTER_SANITIZE_STRING);
         $this->groupBy[] = $groupByField;
         return $this;
     }
@@ -508,7 +508,7 @@ class Model extends \mysqli
      */
     protected function determineType($item)
     {
-        switch (gettype($item)) {
+        switch (\gettype($item)) {
             case 'NULL':
             case 'string':
                 return 's';
@@ -687,7 +687,7 @@ class Model extends \mysqli
             if ($this->where) {
                 $this->bindParams[0] .= $this->whereTypeList;
                 foreach ($this->where as $prop => $val) {
-                    if (!is_array($val)) {
+                    if (!\is_array($val)) {
                         \array_push($this->bindParams, $this->where[$prop]);
                         continue;
                     }
@@ -889,11 +889,11 @@ class Model extends \mysqli
         }
 
         //replace all deliminators with a single one
-        $string = str_replace($deliminators, $deliminators[0], $string);
-        $array = explode($deliminators[0], $string);
+        $string = \str_replace($deliminators, $deliminators[0], $string);
+        $array = \explode($deliminators[0], $string);
         $clean = array();
         foreach ($array as $r) {
-            $clean[] = trim($r);
+            $clean[] = \trim($r);
         }
         return $clean;
     }
