@@ -39,7 +39,7 @@ class Model extends \mysqli
      *
      * @var array
      */
-    protected $whereTypeList = [];
+    protected $whereTypeList;
 
     /**
      * Dynamic type list for order by condition value
@@ -78,17 +78,17 @@ class Model extends \mysqli
     /**
      * @var string
      */
-    public $db_prefix;
+    protected $db_prefix;
 
     /**
      * @var \mysqli_stmt
      */
-    private $stmt;
+    protected $stmt;
 
     /**
      * @var
      */
-    public $db_result;
+    protected $db_result;
 
     /**
      * Db results output can be set to an array or object
@@ -111,6 +111,11 @@ class Model extends \mysqli
      * @var bool
      */
     protected $inTransaction = false;
+
+    /**
+     * @var
+     */
+    public $sqlstate;
 
     /**
      * Model constructor.
@@ -325,7 +330,9 @@ class Model extends \mysqli
 
     /**
      * @param null $tableData
-     * @return self
+     *
+     * @return Model
+     * @throws \Exception
      */
     public function processQuery($tableData = null): self
     {
@@ -337,7 +344,7 @@ class Model extends \mysqli
         {
             $this->setLastError($this->sqlstate . ' ' . $this->error);
             $this->db_result = false;
-            \trigger_error("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
+            throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
         }
         $this->dynamicBindResults();
         $this->reset();
@@ -536,7 +543,8 @@ class Model extends \mysqli
      *
      * @param array $tableData Should contain an array of data for updating the database.
      *
-     * @return self Returns the $this->stmt object.
+     * @return Model Returns the $this->stmt object.
+     * @throws \Exception
      */
     protected function _buildQuery($tableData = null): self
     {
@@ -672,7 +680,7 @@ class Model extends \mysqli
         if (!$this->stmt = $this->prepare($this->query)) {
             $this->setLastError($this->sqlstate . ' ' . $this->error);
             $this->db_result = false;
-            \trigger_error("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
+            throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
         }
 
         // Prepare table data bind parameters
