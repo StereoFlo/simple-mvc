@@ -2,7 +2,7 @@
 
 return [
     'host' => 'localhost',
-    'user' => 'root',
-    'password' => '',
-    'basename' => 'oopExam'
+    'user' => 'dir',
+    'password' => 'dir',
+    'basename' => 'dir'
 ];

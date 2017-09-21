@@ -61,7 +61,7 @@ class Router
         $router = Config::getConfig('router');
         $main = Config::getConfig('main');
         $this->config = $router + $main;
-        if (preg_match(Utils::getProperty($router, 'staticFileExtensions'), $route)) {
+        if (\preg_match(Utils::getProperty($router, 'staticFileExtensions'), $route)) {
             return $this;
         }
         return $this->run();
@@ -110,7 +110,7 @@ class Router
             return false;
         }
         $namespace = $this->getControllerNamespace(Utils::getProperty($route, 'controller'));
-        if (!is_callable($namespace, Utils::getProperty($route, 'action'))) {
+        if (!\is_callable($namespace, Utils::getProperty($route, 'action'))) {
             Response::error503();
             return false;
         }
@@ -130,7 +130,7 @@ class Router
      */
     private function call($callback = [], $args = [])
     {
-        return call_user_func_array($callback, $args);
+        return \call_user_func_array($callback, $args);
     }
 
     /**
@@ -140,7 +140,7 @@ class Router
      */
     private function prepareForNs(string $what): string
     {
-        return str_replace("/", "\\", $what);
+        return \str_replace("/", "\\", $what);
     }
 
     /**
@@ -150,7 +150,7 @@ class Router
      */
     private function prepareForPath(string $what): string
     {
-        return str_replace('\\', '/', $what);
+        return \str_replace('\\', '/', $what);
     }
 
     /**
@@ -162,7 +162,7 @@ class Router
         $route = null;
         $params = [];
         foreach ($routes as $key => $value) {
-            if (preg_match($key, $this->route, $matches)) {
+            if (\preg_match($key, $this->route, $matches)) {
                 $route = $value;
                 unset($matches[0]);
                 $params = $matches;
@@ -179,7 +179,7 @@ class Router
      */
     private function getControllerPath(string $controller): string
     {
-        $path = Utils::getProperty($this->config, 'srcDir') . DS . $this->prepareForPath($controller) . Utils::getProperty($this->config, 'extension');
+        $path = Utils::getProperty($this->config, 'srcDirPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
         return $path;
     }
 
