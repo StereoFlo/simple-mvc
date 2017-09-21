@@ -6,13 +6,19 @@ use Core\Model;
 
 class TestModel extends Model
 {
-    public static function create()
+    /**
+     * @return self
+     */
+    public static function create(): self
     {
         return new self();
     }
 
-    public function getMedia()
+    /**
+     * @return array
+     */
+    public function getMedia(): array
     {
-        return $this->get('media');
+        return [];
     }
 }

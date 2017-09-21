@@ -2,14 +2,14 @@
 
 namespace Controllers\Api;
 
-use Core\ApiController;
+use Core\Controller;
 use Models\TestModel;
 
 /**
  * Class Index
  * @package Controllers
  */
-class Test extends ApiController
+class Test extends Controller
 {
     public static function index()
     {
