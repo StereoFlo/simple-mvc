@@ -173,11 +173,9 @@ class Router
      */
     private function getControllerPath(string $controller): string
     {
-        $path = Utils::getProperty($this->config,
-                'srcDirPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
+        $path = Utils::getProperty($this->config, 'srcDirPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
         if (!file_exists($path)) {
-            $path = Utils::getProperty($this->config,
-                    'packagesPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
+            $path = Utils::getProperty($this->config, 'packagesPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
             if (!file_exists($path)) {
                 throw new \Exception('Controller path not found');
             }

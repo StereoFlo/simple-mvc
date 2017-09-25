@@ -92,7 +92,7 @@ class Config
      */
     private static function getPackageConfig($configName): bool
     {
-        $realPath = realpath(__DIR__ . DS . '..' . DS . 'packages');
+        $realPath = realpath(__DIR__ . DS . '..' . DS . 'Packages');
         $dirContent = scandir($realPath);
         if (empty($dirContent)) {
             return false;
