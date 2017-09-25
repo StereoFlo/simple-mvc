@@ -27,12 +27,6 @@ abstract class Controller
     {
         $mainConfig = Config::getConfig('main');
         $file = realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
-        if (!file_exists($file) && Config::isPackage()) {
-            $file = realpath('../src/packages' . DS . Config::getPackageName() . DS . $viewName . $mainConfig['viewExtension']);
-            if (!file_exists($file)) {
-                throw new \Exception($file . ' template file is not exists');
-            }
-        }
         if (!file_exists($file)) {
             throw new \Exception($file . ' template file is not exists');
         }

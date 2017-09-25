@@ -93,11 +93,11 @@ class Config
     private static function getPackageConfig($configName): bool
     {
         $realPath = realpath(__DIR__ . DS . '..' . DS . 'packages');
-        $content = scandir($realPath);
-        if (empty($content)) {
+        $dirContent = scandir($realPath);
+        if (empty($dirContent)) {
             return false;
         }
-        foreach ($content as $dir) {
+        foreach ($dirContent as $dir) {
             if ($dir === '.' || $dir === '..') {
                 continue;
             }
