@@ -2,5 +2,6 @@
 
 return [
     'viewExtension' => '.php',
-    'viewPath' => '../src' . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR,
+    'viewPath' => '../src' . DS . 'Views' . DS,
+    'packagesPath' => '../src' . DS . 'packages',
 ];

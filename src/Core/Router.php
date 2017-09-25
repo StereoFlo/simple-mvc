@@ -47,6 +47,22 @@ class Router
     }
 
     /**
+     * @return null
+     */
+    public static function getOut()
+    {
+        return self::$out;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMode(): int
+    {
+        return $this->mode;
+    }
+
+    /**
      * Router constructor.
      *
      * @param string $method
@@ -68,55 +84,31 @@ class Router
     }
 
     /**
-     * @return null
-     */
-    public static function getOut()
-    {
-        return self::$out;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMode(): int
-    {
-        return $this->mode;
-    }
-
-    /**
      * @return mixed
+     * @throws \Exception
      */
     private function run()
     {
         $routes = Config::getConfig('routes');
         if (empty($routes)) {
-            Response::error503();
-            return false;
+            throw new \Exception('Routes config cannot be loaded');
         }
         list($route, $params) = $this->getRouteAndParams($routes);
         if (!$route) {
-            Response::error404();
-            return false;
+            throw new \Exception('route for ' . printf($routes, true) . ' not found');
         }
         $this->mode = Utils::getProperty($route, 'mode', '');
         $method = Utils::getProperty($route, 'method', '');
-        if ($this->method !== strtoupper($method)) {
-            Response::error400();
-            return false;
+        if (!empty($this->method) && $this->method !== strtoupper($method)) {
+            throw new \Exception('Bad method for this controller');
         }
         $path = $this->getControllerPath(Utils::getProperty($route, 'controller'));
         if (!file_exists($path)) {
-            Response::error503();
-            return false;
+            throw new \Exception('Controller file not found');
         }
         $namespace = $this->getControllerNamespace(Utils::getProperty($route, 'controller'));
         if (!\is_callable($namespace, Utils::getProperty($route, 'action'))) {
-            Response::error503();
-            return false;
-        }
-        if (empty($params)) {
-            static::$out = $this->call([$namespace, Utils::getProperty($route, 'action')], $params);
-            return true;
+            throw new \Exception('Controller or namespace is not callable');
         }
         static::$out = $this->call([$namespace, Utils::getProperty($route, 'action')], $params);
         return true;
@@ -155,6 +147,7 @@ class Router
 
     /**
      * @param $routes
+     *
      * @return array
      */
     private function getRouteAndParams($routes): array
@@ -176,10 +169,20 @@ class Router
      * @param string $controller
      *
      * @return string
+     * @throws \Exception
      */
     private function getControllerPath(string $controller): string
     {
-        $path = Utils::getProperty($this->config, 'srcDirPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
+        $path = Utils::getProperty($this->config,
+                'srcDirPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
+        if (!file_exists($path)) {
+            $path = Utils::getProperty($this->config,
+                    'packagesPath') . DS . $this->prepareForPath($controller) . \Application::PHP_EXTENSION;
+            if (!file_exists($path)) {
+                throw new \Exception('Controller path not found');
+            }
+        }
+        include_once $path;
         return $path;
     }
 

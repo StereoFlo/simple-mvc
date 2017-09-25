@@ -8,6 +8,8 @@
 
 namespace Core;
 
+use App\Utils;
+
 /**
  * Class Controller
  * @package Core
@@ -15,22 +17,28 @@ namespace Core;
 abstract class Controller
 {
     /**
-     * @param $page
-     * @param array $arr
-     * @return bool
+     * @param $viewName
+     * @param array $params
+     *
+     * @return mixed
      * @throws \Exception
      */
-    final public static function view($page, $arr = [])
+    final public static function view($viewName, $params = [])
     {
         $mainConfig = Config::getConfig('main');
-        $file = realpath($mainConfig['viewPath'] . $page . $mainConfig['viewExtension']);
-        if (file_exists($file)) {
-            foreach ($arr as $var => $val) {
-                $$var = $val;
+        $file = realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        if (!file_exists($file) && Config::isPackage()) {
+            $file = realpath('../src/packages' . DS . Config::getPackageName() . DS . $viewName . $mainConfig['viewExtension']);
+            if (!file_exists($file)) {
+                throw new \Exception($file . ' template file is not exists');
             }
-            include $file;
-            return self::class;
         }
-        throw new \Exception($file . ' template file is not exists');
+        if (!file_exists($file)) {
+            throw new \Exception($file . ' template file is not exists');
+        }
+        foreach ($params as $var => $val) {
+            $$var = $val;
+        }
+        return include $file;
     }
 }
