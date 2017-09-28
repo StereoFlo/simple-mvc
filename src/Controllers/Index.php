@@ -3,7 +3,6 @@
 namespace Controllers;
 
 use Core\Controller;
-use Core\Session;
 
 /**
  * Class Index
@@ -16,7 +15,6 @@ class Index extends Controller
      */
     public static function index()
     {
-        Session::start();
         return self::view('index');
     }
 

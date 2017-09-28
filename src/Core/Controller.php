@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: HOME-PC01
- * Date: 16.10.2016
- * Time: 18:02
- */
 
 namespace Core;
 
@@ -23,10 +17,14 @@ abstract class Controller
      * @return mixed
      * @throws \Exception
      */
-    final public static function view($viewName, $params = [])
+    final public static function view(string $viewName, array $params = [])
     {
         $mainConfig = Config::getConfig('main');
-        $file = realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        if (Utils::getProperty($mainConfig, 'isPackage') && Utils::getProperty($mainConfig, 'packageViewPath')) {
+            $file = realpath(Utils::getProperty($mainConfig, 'packageViewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        } else {
+            $file = realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        }
         if (!file_exists($file)) {
             throw new \Exception($file . ' template file is not exists');
         }

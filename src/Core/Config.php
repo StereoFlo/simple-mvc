@@ -112,7 +112,8 @@ class Config
 
             static::$isPackage = true;
             static::$packageName = $dir;
-            self::mergeConfig($configName, require_once $configFile);
+            $getArray = include_once $configFile;
+            self::mergeConfig($configName, $getArray + ['isPackage' => true]);
         }
         return false;
     }

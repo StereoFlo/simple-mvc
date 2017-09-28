@@ -155,7 +155,7 @@ class Router
         $route = null;
         $params = [];
         foreach ($routes as $key => $value) {
-            if (\preg_match($key, $this->route, $matches)) {
+                if (\preg_match($key, $this->route, $matches)) {
                 $route = $value;
                 unset($matches[0]);
                 $params = $matches;

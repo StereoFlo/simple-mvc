@@ -22,5 +22,4 @@ return [
         'action' => 'index',
         'mode'   => Application::MODE_API,
     ],
-
 ];
