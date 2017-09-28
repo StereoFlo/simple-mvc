@@ -11,29 +11,29 @@ class Response
     /**
      * @var bool
      */
-    private static $_isHtmlResponse = true;
+    private static $isHtmlResponse = true;
 
     /**
      * @var string
      */
-    private static $_contentType;
+    private static $contentType;
 
     /**
      * @var string
      */
-    private static $_charset;
+    private static $charset;
 
     /**
      * @var bool
      */
-    private static $_isNoCache = false;
+    private static $isNoCache = false;
 
     /**
      * 404 error
      */
     public static function error404()
     {
-        \header("HTTP/1.0 404 Not Found");
+        self::applyHeader('HTTP/1.0 404 Not Found', 404);
     }
 
     /**
@@ -41,9 +41,9 @@ class Response
      */
     public static function error503()
     {
-        \header('HTTP/1.1 503 Service Temporarily Unavailable');
-        \header('Status: 503 Service Temporarily Unavailable');
-        \header('Retry-After: 300');
+        self::applyHeader('HTTP/1.1 503 Service Temporarily Unavailable');
+        self::applyHeader('Status: 503 Service Temporarily Unavailable');
+        self::applyHeader('Retry-After: 300');
     }
 
     /**
@@ -51,7 +51,7 @@ class Response
      */
     public static function error400()
     {
-        \header('HTTP/1.1 400 BAD REQUEST');
+        self::applyHeader('HTTP/1.1 400 BAD REQUEST', 400);
     }
 
     /**
@@ -60,10 +60,10 @@ class Response
      */
     public static function applyContentType($contentType = '', $charset = '') {
         if (empty($contentType)) {
-            $contentType = self::$_contentType;
+            $contentType = self::$contentType;
         }
         if (empty($charset)) {
-            $charset = self::$_charset;
+            $charset = self::$charset;
         }
         if (empty($contentType)) {
             return;
@@ -73,19 +73,19 @@ class Response
         } else {
             $str = $contentType;
         }
-        self::$_isHtmlResponse = self::$_contentType === Mime::HTML;
+        self::$isHtmlResponse = self::$contentType === Mime::HTML;
         self::applyHeader('Content-Type: ' . $str);
-        self::$_contentType = null;
+        self::$contentType = null;
     }
 
     /**
      * @param bool $noCache
      */
     public static function applyNoCache($noCache = false) {
-        if ($noCache || self::$_isNoCache) {
+        if ($noCache || self::$isNoCache) {
             self::applyHeader('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
             self::applyHeader('Pragma: no-cache');
-            self::$_isNoCache = null;
+            self::$isNoCache = null;
         }
     }
 
