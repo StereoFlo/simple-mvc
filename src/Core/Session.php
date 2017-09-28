@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use App\Utils;
+
 class Session
 {
     /**
@@ -28,7 +30,7 @@ class Session
      */
     public static function write(string $key, $value)
     {
-        if (!is_string($key)) {
+        if (!\is_string($key)) {
             throw new \Exception('Session key must be string value');
         }
         self::init();
@@ -53,18 +55,17 @@ class Session
             throw new \Exception('Session key must be string value');
         }
         self::init();
-        if (isset($_SESSION[$key])) {
-            self::age();
-
-            if (false == $child) {
-                return $_SESSION[$key];
-            } else {
-                if (isset($_SESSION[$key][$child])) {
-                    return $_SESSION[$key][$child];
-                }
-            }
+        $keyValue = Utils::getProperty($_SESSION, $key);
+        if (!$keyValue) {
+            return false;
         }
-
+        self::age();
+        if (false === $child) {
+            return $keyValue;
+        }
+        if (Utils::getProperty($keyValue, $child)) {
+            return $_SESSION[$key][$child];
+        }
         return false;
     }
 
@@ -73,10 +74,10 @@ class Session
      *
      * @param string $key String identifying the array key to delete.
      *
-     * @return void
+     * @return bool
      * @throws \Exception
      */
-    public static function delete(string $key)
+    public static function delete(string $key): bool
     {
         if (!is_string($key)) {
             throw new \Exception('Session key must be string value');
@@ -84,6 +85,7 @@ class Session
         self::init();
         unset($_SESSION[$key]);
         self::age();
+        return true;
     }
 
     /**
@@ -110,23 +112,16 @@ class Session
      *
      * @return bool Returns true upon success and false upon failure.
      */
-    public static function start(
-        bool $regenerate_session_id = true,
-        int $limit = 0,
-        $path = '/',
-        string $domain = null,
-        $secure_cookies_only = null
-    ) {
-        // this function is extraneous
+    public static function start(bool $regenerate_session_id = true, int $limit = 0, $path = '/', string $domain = null, $secure_cookies_only = null)
+    {
         return self::init($regenerate_session_id, $limit, $path, $domain, $secure_cookies_only);
     }
 
     /**
-     *
+     * @return bool
      */
-    public static function regenerate_session_id()
+    public static function regenerate_session_id(): bool
     {
-
         $session = [];
         foreach ($_SESSION as $k => $v) {
             $session[$k] = $v;
@@ -137,6 +132,7 @@ class Session
         foreach ($session as $k => $v) {
             $_SESSION[$k] = $v;
         }
+        return true;
     }
 
     /**
@@ -144,14 +140,16 @@ class Session
      *
      * @return array Associative array of session cookie parameters.
      */
-    public static function params()
+    public static function params(): array
     {
-        $r = [];
+        $currentSessionData = [];
         if ('' !== session_id()) {
-            $r = session_get_cookie_params();
+            $currentSessionData = session_get_cookie_params();
         }
-
-        return $r;
+        if (empty($currentSessionData)) {
+            return [];
+        }
+        return $currentSessionData;
     }
 
     /**
@@ -159,10 +157,11 @@ class Session
      *
      * @return boolean Returns true upon success and false upon failure.
      */
-    public static function close()
+    public static function close(): bool
     {
         if ('' !== session_id()) {
-            return session_write_close();
+            session_write_close();
+            return true;
         }
 
         return true;
@@ -174,7 +173,7 @@ class Session
      * @see Session::close()
      * @return boolean Returns true upon success and false upon failure.
      */
-    public static function commit()
+    public static function commit(): bool
     {
         return self::close();
     }
@@ -182,21 +181,21 @@ class Session
     /**
      * Removes session data and destroys the current session.
      *
-     * @return void
+     * @return bool
      */
-    public static function destroy()
+    public static function destroy(): bool
     {
-        if ('' !== session_id()) {
-            $_SESSION = [];
-            if (ini_get("session.use_cookies")) {
-                $params = session_get_cookie_params();
-                setcookie(session_name(), '', time() - 42000,
-                    $params["path"], $params["domain"],
-                    $params["secure"], $params["httponly"]
-                );
-            }
-            session_destroy();
+        if (empty(session_id())) {
+            return false;
         }
+
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+        }
+        return session_destroy();
+
     }
 
     /**
@@ -247,7 +246,6 @@ class Session
                 if ($regenerate_session_id) {
                     self::regenerate_session_id();
                 }
-
                 return true;
             } catch (\Exception $exception) {
                 throw new \Exception($exception->getMessage());
@@ -258,7 +256,6 @@ class Session
             self::regenerate_session_id();
             $_SESSION['regenerated_id'] = session_id();
         }
-
         return true;
 
     }
