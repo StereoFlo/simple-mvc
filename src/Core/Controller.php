@@ -1,12 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: HOME-PC01
- * Date: 16.10.2016
- * Time: 18:02
- */
 
 namespace Core;
+
+use App\Utils;
 
 /**
  * Class Controller
@@ -15,22 +11,26 @@ namespace Core;
 abstract class Controller
 {
     /**
-     * @param $page
-     * @param array $arr
-     * @return bool
+     * @param $viewName
+     * @param array $params
+     *
+     * @return mixed
      * @throws \Exception
      */
-    final public static function view($page, $arr = [])
+    final public static function view(string $viewName, array $params = [])
     {
         $mainConfig = Config::getConfig('main');
-        $file = realpath($mainConfig['viewPath'] . $page . $mainConfig['viewExtension']);
-        if (file_exists($file)) {
-            foreach ($arr as $var => $val) {
-                $$var = $val;
-            }
-            include $file;
-            return self::class;
+        if (Utils::getProperty($mainConfig, 'isPackage') && Utils::getProperty($mainConfig, 'packageViewPath')) {
+            $file = realpath(Utils::getProperty($mainConfig, 'packageViewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        } else {
+            $file = realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
         }
-        throw new \Exception($file . ' template file is not exists');
+        if (!file_exists($file)) {
+            throw new \Exception($file . ' template file is not exists');
+        }
+        foreach ($params as $var => $val) {
+            $$var = $val;
+        }
+        return include $file;
     }
 }
