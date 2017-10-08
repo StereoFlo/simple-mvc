@@ -12,16 +12,6 @@ use Core\Router;
 class Application
 {
     /**
-     * default php extension
-     */
-    const PHP_EXTENSION = '.php';
-
-    /**
-     * Source directory
-     */
-    const SRC_DIR = 'src';
-
-    /**
      * Modes
      */
     const MODE_API = 1,
@@ -76,14 +66,14 @@ class Application
      * @param bool $flag
      * @return string
      */
-    private function recursiveAutoload(string $file, string $path, string $ext = self::PHP_EXTENSION, bool &$flag): string
+    private function recursiveAutoload(string $file, string $path, string $ext = \PHP_EXTENSION, bool &$flag): string
     {
         $res = '';
         if (false !== ($handle = opendir($path)) && $flag) {
             while (false !== ($dir = readdir($handle)) && $flag) {
                 if (false === strpos($dir, '.')) {
-                    $path2 = $path . DIRECTORY_SEPARATOR . $dir;
-                    $filePath = $path2 . DIRECTORY_SEPARATOR . $file . $ext;
+                    $path2 = $path . DS . $dir;
+                    $filePath = $path2 . DS . $file . $ext;
                     if (!file_exists($filePath)) {
                         $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
                     }
@@ -147,13 +137,11 @@ class Application
      */
     private function getPaths(string $file, bool $ext, bool $dir): array
     {
-        $srcPath = DS . '..' . DS . static::SRC_DIR . DS;
         if (false === $ext) {
-            $path = $_SERVER['DOCUMENT_ROOT'] . $srcPath;
-            $filePath = $path . $file . static::PHP_EXTENSION;
-            return [$path, $filePath];
+            $filePath = SRC_DIR . DS . $file . \PHP_EXTENSION;
+            return [SRC_DIR . DS, $filePath];
         }
-        $path = $_SERVER['DOCUMENT_ROOT'] . (($dir) ? $srcPath . $dir : '');
+        $path = SRC_DIR . DS . (($dir) ? SRC_DIR . $dir : '');
         $filePath = $path . DS . $file . '.' . $ext;
         return [$path, $filePath];
     }

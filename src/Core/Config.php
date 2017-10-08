@@ -34,7 +34,7 @@ class Config
     {
         if (!isset(static::$config[$configName])) {
             static::$configName = $configName;
-            $fullPath = '..' . DS . static::$configPath . DIRECTORY_SEPARATOR . static::$configName . \Application::PHP_EXTENSION;
+            $fullPath = '..' . DS . static::$configPath . DIRECTORY_SEPARATOR . static::$configName . \PHP_EXTENSION;
             if (!file_exists($fullPath)) {
                 throw new \Exception('Config is not exists!');
             }

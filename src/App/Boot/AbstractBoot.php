@@ -7,5 +7,10 @@ namespace App\Boot;
  */
 abstract class AbstractBoot
 {
-    public static function run($out){}
+    /**
+     * @param $out
+     *
+     * @return mixed
+     */
+    abstract public static function run($out);
 }
