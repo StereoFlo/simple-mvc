@@ -122,7 +122,7 @@ class Model extends \mysqli
      */
     public function __construct()
     {
-        $config = Config::getConfig('mysql');
+        $config = Config::getConfig('main', 'mysql');
         $host = Utils::getProperty($config, 'host');
         $dbUser = Utils::getProperty($config, 'user');
         $dbPassword = Utils::getProperty($config, 'password');

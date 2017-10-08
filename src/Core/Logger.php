@@ -14,7 +14,7 @@ class Logger
      */
     public static function logToFile(string $message = ''): bool
     {
-        $logs = Config::getConfig('common', 'logs');
+        $logs = Config::getConfig('main', 'logger');
         return file_put_contents($logs['path'] . DIRECTORY_SEPARATOR . $logs['prefix'] . '.php', $message . PHP_EOL, FILE_APPEND) > 0;
     }
 }

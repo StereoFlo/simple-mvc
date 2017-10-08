@@ -1,4 +1,3 @@
 <?php
-require_once __DIR__ . '/../src/Application.php';
-define('DS', DIRECTORY_SEPARATOR);
+include_once '../src/bootstrap.php';
 Application::run();
