@@ -7,15 +7,6 @@ namespace Core;
  */
 class Config
 {
-    /**
-     * @var bool
-     */
-    private static $isPackage = false;
-
-    /**
-     * @var string
-     */
-    private static $packageName = '';
 
     /**
      * @var string
@@ -31,22 +22,6 @@ class Config
      * @var string
      */
     private static $configName = '';
-
-    /**
-     * @return bool
-     */
-    public static function isPackage(): bool
-    {
-        return self::$isPackage;
-    }
-
-    /**
-     * @return string
-     */
-    public static function getPackageName(): string
-    {
-        return self::$packageName;
-    }
 
     /**
      * @param string $configName
@@ -109,9 +84,6 @@ class Config
             if (!file_exists($configFile)) {
                 continue;
             }
-
-            static::$isPackage = true;
-            static::$packageName = $dir;
             $getArray = include_once $configFile;
             self::mergeConfig($configName, $getArray + ['isPackage' => true]);
         }
