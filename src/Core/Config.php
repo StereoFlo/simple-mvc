@@ -26,7 +26,9 @@ class Config
     /**
      * @param string $configName
      * @param string $key
+     *
      * @return mixed
+     * @throws \Exception
      */
     public static function getConfig(string $configName, string $key = null)
     {
@@ -34,11 +36,8 @@ class Config
             static::$configName = $configName;
             $fullPath = '..' . DS . static::$configPath . DIRECTORY_SEPARATOR . static::$configName . \Application::PHP_EXTENSION;
             if (!file_exists($fullPath)) {
-                if (!self::getPackageConfig($configName)) {
-                    return [];
-                }
+                throw new \Exception('Config is not exists!');
             }
-            self::getPackageConfig($configName);
             self::mergeConfig($configName, require_once $fullPath);
         }
         if (!$key) {
@@ -58,36 +57,6 @@ class Config
             return false;
         }
         return self::$config[self::$configName][$key];
-    }
-
-    /**
-     * @param $configName
-     *
-     * @return bool
-     */
-    private static function getPackageConfig($configName): bool
-    {
-        $realPath = realpath(__DIR__ . DS . '..' . DS . 'Packages');
-        $dirContent = scandir($realPath);
-        if (empty($dirContent)) {
-            return false;
-        }
-        foreach ($dirContent as $dir) {
-            if ($dir === '.' || $dir === '..') {
-                continue;
-            }
-            $fullPath = $realPath . DS . $dir;
-            if (!is_dir($fullPath)) {
-                continue;
-            }
-            $configFile = $fullPath . DS . static::$configPath . DS . static::$configName . \Application::PHP_EXTENSION;
-            if (!file_exists($configFile)) {
-                continue;
-            }
-            $getArray = include_once $configFile;
-            self::mergeConfig($configName, $getArray + ['isPackage' => true]);
-        }
-        return false;
     }
 
     /**
