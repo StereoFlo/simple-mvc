@@ -155,7 +155,7 @@ class Router
         $route = null;
         $params = [];
         foreach ($routes as $key => $value) {
-                if (\preg_match($key, $this->route, $matches)) {
+            if (\preg_match($key, $this->route, $matches)) {
                 $route = $value;
                 unset($matches[0]);
                 $params = $matches;
@@ -174,9 +174,9 @@ class Router
     private function getControllerPath(string $controller): string
     {
         $path = Utils::getProperty($this->config, 'srcDirPath') . DS . $this->prepareForPath($controller) . \PHP_EXTENSION;
-        if (!file_exists($path)) {
+        if (!\file_exists($path)) {
             $path = Utils::getProperty($this->config, 'packagesPath') . DS . $this->prepareForPath($controller) . \PHP_EXTENSION;
-            if (!file_exists($path)) {
+            if (!\file_exists($path)) {
                 throw new \Exception('Controller path not found');
             }
         }

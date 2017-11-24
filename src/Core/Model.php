@@ -336,7 +336,7 @@ class Model extends \mysqli
      */
     public function processQuery($tableData = null): self
     {
-        $this->_buildQuery($tableData);
+        $this->buildQuery($tableData);
         $this->setLastQuery($this->query);
 
         //execute query
@@ -361,7 +361,7 @@ class Model extends \mysqli
      *
      * @return self
      */
-    public function where($whereProp, $whereValue): self
+    public function where(string $whereProp, $whereValue): self
     {
         $this->where[$whereProp] = $whereValue;
         return $this;
@@ -409,21 +409,21 @@ class Model extends \mysqli
      * @uses $MySqliDb->orderBy('id', 'desc')->orderBy('name', 'desc');
      *
      * @param string $orderByField     The name of the database field.
-     * @param string $orderbyDirection Order direction.
+     * @param string $orderByDirection Order direction.
      *
      * @return Model
      * @throws \Exception
      */
-    public function orderBy($orderByField, $orderbyDirection = "DESC")
+    public function orderBy(string $orderByField, string $orderByDirection = 'DESC'): self
     {
         $allowedDirection = ["ASC", "DESC"];
-        $orderbyDirection = \strtoupper(\trim($orderbyDirection));
+        $orderByDirection = \strtoupper(\trim($orderByDirection));
         $orderByField = \filter_var($orderByField, FILTER_SANITIZE_STRING);
 
-        if (empty($orderbyDirection) || !in_array($orderbyDirection, $allowedDirection))
-            throw new \Exception('Wrong order direction: ' . $orderbyDirection);
+        if (empty($orderByDirection) || !in_array($orderByDirection, $allowedDirection))
+            throw new \Exception('Wrong order direction: ' . $orderByDirection);
 
-        $this->orderBy[$orderByField] = $orderbyDirection;
+        $this->orderBy[$orderByField] = $orderByDirection;
         return $this;
     }
 
@@ -456,23 +456,22 @@ class Model extends \mysqli
     }
 
     /**
-     * @param $offset
+     * @param int $offset
      *
      * @return $this
      */
-    public function offset($offset)
+    public function offset(int $offset = 0): self
     {
-        $offset = \filter_var($offset, FILTER_SANITIZE_NUMBER_INT);
         $this->offset = ($offset > 0) ? $offset : 0;
         return $this;
     }
 
     /**
-     * @param $output
+     * @param string $output
      *
      * @return $this
      */
-    public function output($output)
+    public function output(string $output): self
     {
         if (!in_array($output, ['object', 'array'])) {
             $output = 'array';
@@ -486,7 +485,7 @@ class Model extends \mysqli
      *
      * @return integer The last inserted item ID.
      */
-    public function getInsertId()
+    public function getInsertId(): int
     {
         return $this->insert_id;
     }
@@ -513,7 +512,7 @@ class Model extends \mysqli
      *
      * @return string The joined parameter types.
      */
-    protected function determineType($item)
+    protected function determineType(string $item): string
     {
         switch (\gettype($item)) {
             case 'NULL':
@@ -546,17 +545,13 @@ class Model extends \mysqli
      * @return Model Returns the $this->stmt object.
      * @throws \Exception
      */
-    protected function _buildQuery($tableData = null): self
+    protected function buildQuery($tableData = null): self
     {
         $hasTableData = \is_array($tableData);
         $hasConditional = !empty($this->where);
 
         // Did the user call the "join" method?
-        if (!empty($this->join)) {
-            foreach ($this->join as $prop => $value) {
-                $this->query .= " " . $prop . " ON " . $value;
-            }
-        }
+        $this->makeJoin();
 
         // Did the user call the "where" method?
         if (!empty($this->where)) {
@@ -571,7 +566,7 @@ class Model extends \mysqli
                         // prepares the reset of the SQL query.
                         $this->query .= ($prop . ' = ?, ');
                     }
-                    $this->query = rtrim($this->query, ', ');
+                    $this->query = \rtrim($this->query, ', ');
                 }
             }
 
@@ -614,31 +609,10 @@ class Model extends \mysqli
         }
 
         // Did the user call the "customWhere" method?
-        if (!empty($this->customWhere)) {
-            //is this the only "where"?
-            $this->query .= (!empty($this->where)) ? ' AND ' : ' WHERE ';
-            $this->query .= $this->customWhere;
-        }
+        $this->makeCustomWhere();
+        $this->makeGroupBy();
+        $this->makeOrderBy();
 
-        // Did the user call the "groupBy" method?
-        if (!empty($this->groupBy)) {
-            $this->query .= " GROUP BY ";
-            foreach ($this->groupBy as $key => $value) {
-                // prepares the reset of the SQL query.
-                $this->query .= $value . ", ";
-            }
-            $this->query = \rtrim($this->query, ', ') . " ";
-        }
-
-        // Did the user call the "orderBy" method?
-        if (!empty ($this->orderBy)) {
-            $this->query .= " ORDER BY ";
-            foreach ($this->orderBy as $prop => $value) {
-                // prepares the reset of the SQL query.
-                $this->query .= $prop . " " . $value . ", ";
-            }
-            $this->query = \rtrim($this->query, ', ') . " ";
-        }
 
         // Determine if is INSERT query
         if ($hasTableData) {
@@ -666,18 +640,12 @@ class Model extends \mysqli
                 $this->query .= ')';
             }
         }
+        $this->makeLimit();
 
-        // Did the user call the "limit" method?
-        if (!empty($this->limit)) {
-            if ($this->offset > 0) {
-                $this->query .= ' LIMIT ' . (int) $this->offset . ',' . (int) $this->limit;
-            } else {
-                $this->query .= ' LIMIT ' . (int) $this->limit;
-            }
-        }
 
         // Prepare query
-        if (!$this->stmt = $this->prepare($this->query)) {
+        $this->stmt = $this->prepare($this->query);
+        if (!$this->stmt) {
             $this->setLastError($this->sqlstate . ' ' . $this->error);
             $this->db_result = false;
             throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
@@ -904,6 +872,87 @@ class Model extends \mysqli
             $clean[] = \trim($r);
         }
         return $clean;
+    }
+
+    /**
+     * @return self
+     */
+    protected function makeJoin(): self
+    {
+        if (empty($this->join)) {
+            return $this;
+        }
+        foreach ($this->join as $prop => $value) {
+            $this->query .= " " . $prop . " ON " . $value;
+        }
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    protected function makeCustomWhere(): self
+    {
+        if (empty($this->customWhere)) {
+            return $this;
+        }
+        //is this the only "where"?
+        $this->query .= (!empty($this->where)) ? ' AND ' : ' WHERE ';
+        $this->query .= $this->customWhere;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function makeGroupBy(): self
+    {
+        // Did the user call the "groupBy" method?
+        if (empty($this->groupBy)) {
+            return $this;
+        }
+        $this->query .= " GROUP BY ";
+        foreach ($this->groupBy as $key => $value) {
+            // prepares the reset of the SQL query.
+            $this->query .= $value . ", ";
+        }
+        $this->query = \rtrim($this->query, ', ') . " ";
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    protected function makeOrderBy(): self
+    {
+        // Did the user call the "orderBy" method?
+        if (empty ($this->orderBy)) {
+            return $this;
+        }
+        $this->query .= " ORDER BY ";
+        foreach ($this->orderBy as $prop => $value) {
+            // prepares the reset of the SQL query.
+            $this->query .= $prop . " " . $value . ", ";
+        }
+        $this->query = \rtrim($this->query, ', ') . " ";
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    protected function makeLimit(): self
+    {
+        // Did the user call the "limit" method?
+        if (empty($this->limit)) {
+            return $this;
+        }
+        if (empty($this->offset)) {
+            $this->query .= ' LIMIT ' . $this->limit;
+            return $this;
+        }
+        $this->query .= ' LIMIT ' . $this->offset . ',' . $this->limit;
+        return $this;
     }
 
 }

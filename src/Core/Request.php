@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use App\Utils;
+
 /**
  * Class Input
  * @package Core
@@ -9,27 +11,27 @@ namespace Core;
 class Request
 {
     /**
-     * @param string|null $key
+     * @param string $key
      * @return string|null
      */
-    public static function takeGet(string $key = null)
+    public static function takeGet(string $key = '')
     {
-        if ($key) {
-            return $_GET[$key] ?? null;
+        if (empty($key)) {
+            return $_GET;
         }
-        return $_GET;
+        return Utils::getProperty($_GET, $key);
     }
 
     /**
      * @param string|null $key
      * @return string|null
      */
-    public static function takePost(string $key = null)
+    public static function takePost(string $key = '')
     {
-        if ($key) {
-            return $_POST[$key] ?? null;
+        if (empty($key)) {
+            return $_POST;
         }
-        return $_POST;
+        return Utils::getProperty($_POST, $key);
     }
 
     /**

@@ -11,6 +11,12 @@ use App\Utils;
 abstract class Controller
 {
     /**
+     * Hash for loaded views
+     * @var array
+     */
+    protected static $loadedViews = [];
+
+    /**
      * @param $viewName
      * @param array $params
      *
@@ -20,13 +26,17 @@ abstract class Controller
     final public static function view(string $viewName, array $params = [])
     {
         $mainConfig = Config::getConfig('main');
-        $file = realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
-        if (!file_exists($file)) {
-            throw new \Exception($file . ' template file is not exists');
+        $filePath = \realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        if (!\file_exists($filePath)) {
+            throw new \Exception($filePath . ' template file is not exists');
         }
         foreach ($params as $var => $val) {
             $$var = $val;
         }
-        return include $file;
+        if (empty(self::$loadedViews[\md5($filePath)])) {
+            self::$loadedViews[\md5($filePath)] = include_once $filePath;
+            return self::$loadedViews[\md5($filePath)];
+        }
+        return self::$loadedViews[\md5($filePath)];
     }
 }

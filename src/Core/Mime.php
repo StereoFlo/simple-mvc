@@ -49,8 +49,7 @@ final class Mime {
         TIFF    = 'image/tiff',
         ICO     = 'image/vnd.microsoft.icon',
         WBMP    = 'image/vnd.wap.wbmp',
-        BMP     = 'image/x-ms-bmp'
-    ;
+        BMP     = 'image/x-ms-bmp';
 
     const
         FORM_URL  = 'application/x-domain-form-urlencoded',
@@ -94,7 +93,7 @@ final class Mime {
      */
     public static function resolve($file)
     {
-        $fi = self::_getFileInfo();
+        $fi = self::getFileInfo();
         $mime = $fi->file($file, FILEINFO_MIME_TYPE);
         return $mime;
     }
@@ -102,7 +101,7 @@ final class Mime {
     /**
      * @return \Finfo
      */
-    protected static function _getFileInfo()
+    protected static function getFileInfo()
     {
         if (!self::$fileInfo instanceof \Finfo) {
             self::$fileInfo = new \Finfo(\FILEINFO_MIME);
