@@ -32,7 +32,7 @@ class Application
      */
     private function __construct()
     {
-        spl_autoload_register([$this, 'loader']);
+        \spl_autoload_register([$this, 'loader']);
         return $this->go();
     }
 
@@ -45,10 +45,10 @@ class Application
      */
     private function loader(string $file, bool $ext = false, bool $dir = false)
     {
-        $file = str_replace('\\', '/', $file);
+        $file = \str_replace('\\', '/', $file);
         list($path, $filePath) = $this->getPaths($file, $ext, $dir);
 
-        if (!file_exists($filePath)) {
+        if (!\file_exists($filePath)) {
             $flag = false;
             return $this->recursiveAutoload($file, $path, $ext, $flag);
         }
@@ -69,12 +69,12 @@ class Application
     private function recursiveAutoload(string $file, string $path, string $ext = \PHP_EXTENSION, bool &$flag): string
     {
         $res = '';
-        if (false !== ($handle = opendir($path)) && $flag) {
-            while (false !== ($dir = readdir($handle)) && $flag) {
-                if (false === strpos($dir, '.')) {
+        if (false !== ($handle = \opendir($path)) && $flag) {
+            while (false !== ($dir = \readdir($handle)) && $flag) {
+                if (false === \strpos($dir, '.')) {
                     $path2 = $path . DS . $dir;
                     $filePath = $path2 . DS . $file . $ext;
-                    if (!file_exists($filePath)) {
+                    if (!\file_exists($filePath)) {
                         $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
                     }
                     $flag = false;
@@ -85,7 +85,7 @@ class Application
                     return $filePath;
                 }
             }
-            closedir($handle);
+            \closedir($handle);
         }
         return $res;
     }

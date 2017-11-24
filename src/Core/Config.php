@@ -7,12 +7,6 @@ namespace Core;
  */
 class Config
 {
-
-    /**
-     * @var string
-     */
-    private static $configPath = 'config';
-
     /**
      * @var array
      */
@@ -34,7 +28,7 @@ class Config
     {
         if (!isset(static::$config[$configName])) {
             static::$configName = $configName;
-            $fullPath = '..' . DS . static::$configPath . DIRECTORY_SEPARATOR . static::$configName . \PHP_EXTENSION;
+            $fullPath = CONFIG_PATH . DS . static::$configName . \PHP_EXTENSION;
             if (!file_exists($fullPath)) {
                 throw new \Exception('Config is not exists!');
             }
