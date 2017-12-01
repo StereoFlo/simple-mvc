@@ -33,7 +33,7 @@ class Config
             }
             self::mergeConfig($configName, require_once self::getConfigPath());
         }
-        if (!$key) {
+        if (empty($key)) {
             return static::$config[$configName];
         }
         return self::getFromConfig($key);
