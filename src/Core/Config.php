@@ -28,11 +28,10 @@ class Config
     {
         if (!isset(static::$config[$configName])) {
             static::$configName = $configName;
-            $fullPath = CONFIG_PATH . DS . static::$configName . \PHP_EXTENSION;
-            if (!file_exists($fullPath)) {
+            if (!file_exists(self::getConfigPath())) {
                 throw new \Exception('Config is not exists!');
             }
-            self::mergeConfig($configName, require_once $fullPath);
+            self::mergeConfig($configName, require_once self::getConfigPath());
         }
         if (!$key) {
             return static::$config[$configName];
@@ -43,12 +42,12 @@ class Config
     /**
      * @param string|null $key
      *
-     * @return mixed
+     * @return array
      */
     private static function getFromConfig(string $key = null)
     {
-        if (!$key && !isset(self::$config[self::$configName][$key])) {
-            return false;
+        if (empty($key) && !isset(self::$config[self::$configName][$key])) {
+            return [];
         }
         return self::$config[self::$configName][$key];
     }
@@ -57,15 +56,24 @@ class Config
      * @param string $name
      * @param array  $includedConfig
      *
-     * @return bool
+     * @return array
      */
-    private static function mergeConfig(string $name, array $includedConfig): bool
+    private static function mergeConfig(string $name, array $includedConfig): array
     {
         if (isset(static::$config[$name])) {
             static::$config[$name] = static::$config[$name] + $includedConfig;
-        } else {
-            static::$config[$name] = $includedConfig;
+            return static::$config;
         }
-        return true;
+
+        static::$config[$name] = $includedConfig;
+        return static::$config;
+    }
+
+    /**
+     * @return string
+     */
+    private static function getConfigPath(): string
+    {
+        return CONFIG_PATH . DS . static::$configName . \PHP_EXTENSION;
     }
 }
