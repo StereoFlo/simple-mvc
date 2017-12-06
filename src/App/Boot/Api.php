@@ -20,7 +20,7 @@ class Api extends AbstractBoot
     {
         Response::applyContentType(Mime::JSON, 'utf-8');
         Response::applyNoCache(true);
-        print json_encode($out);
+        print \json_encode($out);
         return true;
     }
 }
