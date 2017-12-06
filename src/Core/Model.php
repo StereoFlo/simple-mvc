@@ -37,9 +37,9 @@ class Model extends \mysqli
     /**
      * Dynamic type list for where condition values
      *
-     * @var array
+     * @var string
      */
-    protected $whereTypeList;
+    protected $whereTypeList = '';
 
     /**
      * Dynamic type list for order by condition value
@@ -64,9 +64,9 @@ class Model extends \mysqli
     /**
      * Dynamic type list for table data values
      *
-     * @var array
+     * @var string
      */
-    protected $paramTypeList = [];
+    protected $paramTypeList = '';
 
     /**
      * Dynamic array that holds a combination of where condition/table data value types and parameter references
@@ -95,7 +95,7 @@ class Model extends \mysqli
      *
      * @var
      */
-    protected $output = 'object';
+    protected $output = 'array';
 
     /**
      * @var
@@ -113,16 +113,16 @@ class Model extends \mysqli
     protected $inTransaction = false;
 
     /**
-     * @var
+     * @var string
      */
-    public $sqlstate;
+    public $sqlstate = '';
 
     /**
      * Model constructor.
      */
     public function __construct()
     {
-        $config = Config::getConfig('main', 'mysql');
+        $config = Config::getConfig('main', 'database');
         $host = Utils::getProperty($config, 'host');
         $dbUser = Utils::getProperty($config, 'user');
         $dbPassword = Utils::getProperty($config, 'password');
@@ -151,8 +151,8 @@ class Model extends \mysqli
         $this->groupBy = [];
         $this->bindParams = ['']; // Create the empty 0 index
         $this->query = '';
-        $this->whereTypeList = [];
-        $this->paramTypeList = [];
+        $this->whereTypeList = '';
+        $this->paramTypeList = '';
         $this->output = null;
         $this->limit = 0;
         $this->offset = 0;
@@ -294,7 +294,7 @@ class Model extends \mysqli
     public function insert(string $tableName, $tableData)
     {
         $this->query = 'INSERT INTO ' . $this->db_prefix . $tableName;
-        $this->processQuery();
+        $this->processQuery($tableData);
         return $this->db_result;
     }
 
@@ -309,7 +309,7 @@ class Model extends \mysqli
     public function update(string $tableName, $tableData)
     {
         $this->query = 'UPDATE ' . $this->db_prefix . $tableName . ' SET ';
-        $this->processQuery();
+        $this->processQuery($tableData);
         return $this->db_result;
     }
 
@@ -344,7 +344,7 @@ class Model extends \mysqli
         {
             $this->setLastError($this->sqlstate . ' ' . $this->error);
             $this->db_result = false;
-            throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
+            throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error . ' ' . print_r($this->stmt->error_list, true));
         }
         $this->dynamicBindResults();
         $this->reset();
