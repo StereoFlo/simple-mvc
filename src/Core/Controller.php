@@ -26,7 +26,7 @@ abstract class Controller
     final public static function view(string $viewName, array $params = [])
     {
         $mainConfig = Config::getConfig('main');
-        $filePath = \realpath(Utils::getProperty($mainConfig, 'viewPath') . $viewName . Utils::getProperty($mainConfig, 'viewExtension'));
+        $filePath = \realpath(Utils::getProperty($mainConfig, 'viewPath') . DS . $viewName . \PHP_EXTENSION);
         if (!\file_exists($filePath)) {
             throw new \Exception($filePath . ' template file is not exists');
         }

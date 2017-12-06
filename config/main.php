@@ -1,10 +1,8 @@
 <?php
 
 return [
-
-    'viewExtension' => '.php',
-    'viewPath' => '../src' . DS . 'Views' . DS,
-    'packagesPath' => '../src' . DS . 'Packages',
+    'viewPath' => SRC_DIR . DS . 'Views',
+    'packagesPath' => SRC_DIR . DS . 'Packages',
 
     /**
      *  Logger config
