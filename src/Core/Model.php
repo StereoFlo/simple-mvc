@@ -119,6 +119,7 @@ class Model extends \mysqli
 
     /**
      * Model constructor.
+     * @throws \Exception
      */
     public function __construct()
     {
@@ -166,11 +167,11 @@ class Model extends \mysqli
      * @param array $bindParams All variables to bind to the SQL statement.
      *
      * @return array Contains the returned rows from the query.
+     * @throws \Exception
      */
     public function rawQuery(string $query, $bindParams = null): array
     {
         $this->query = \filter_var($query, FILTER_SANITIZE_STRING);
-        //html entities added by filter have to be decoded or statement prepare will break
         $this->query = \html_entity_decode($this->query);
 
         if (\is_array($bindParams)) {
@@ -188,9 +189,10 @@ class Model extends \mysqli
     /**
      *
      * @param string $query Contains a user-provided select query.
-     * @param int    $resultMode
+     * @param int $resultMode
      *
      * @return array Contains the returned rows from the query.
+     * @throws \Exception
      */
     public function query($query, $resultMode = MYSQLI_STORE_RESULT): array
     {
@@ -207,6 +209,7 @@ class Model extends \mysqli
      * @param string|array $columns The database columns to select.
      *
      * @return array Contains the returned rows from the select query.
+     * @throws \Exception
      */
     public function get(string $tableName, $columns = '*'): array
     {
@@ -224,6 +227,7 @@ class Model extends \mysqli
      * @param string|array $columns The database columns to select.
      *
      * @return array Contains the returned rows from the select query.
+     * @throws \Exception
      */
     public function getOne(string $tableName, $columns = '*')
     {
@@ -247,6 +251,7 @@ class Model extends \mysqli
      * @param string|array $column The database column to select.
      *
      * @return array Contains the returned rows from the select query.
+     * @throws \Exception
      */
     public function getCol(string $tableName, $column)
     {
@@ -270,6 +275,7 @@ class Model extends \mysqli
      * @param string|array $columns The database columns to select.
      *
      * @return array Contains the returned rows from the select query.
+     * @throws \Exception
      */
     public function getVar(string $tableName, $columns = '*')
     {
@@ -290,8 +296,9 @@ class Model extends \mysqli
      * @param array $tableData Data containing information for inserting into the DB.
      *
      * @return boolean Boolean indicating whether the insert query was completed succesfully.
+     * @throws \Exception
      */
-    public function insert(string $tableName, $tableData)
+    public function insert(string $tableName, array $tableData = [])
     {
         $this->query = 'INSERT INTO ' . $this->db_prefix . $tableName;
         $this->processQuery($tableData);
@@ -305,6 +312,7 @@ class Model extends \mysqli
      * @param array $tableData Array of data to update the desired row.
      *
      * @return boolean
+     * @throws \Exception
      */
     public function update(string $tableName, $tableData)
     {
@@ -319,6 +327,7 @@ class Model extends \mysqli
      * @param string $tableName The name of the database table to work with.
      *
      * @return boolean Indicates success. 0 or 1.
+     * @throws \Exception
      */
     public function delete(string $tableName)
     {
@@ -329,22 +338,19 @@ class Model extends \mysqli
     }
 
     /**
-     * @param null $tableData
+     * @param array $tableData
      *
      * @return Model
      * @throws \Exception
      */
-    public function processQuery($tableData = null): self
+    public function processQuery(array $tableData = []): self
     {
         $this->buildQuery($tableData);
         $this->setLastQuery($this->query);
 
         //execute query
-        if (!$this->stmt->execute())
-        {
-            $this->setLastError($this->sqlstate . ' ' . $this->error);
-            $this->db_result = false;
-            throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error . ' ' . print_r($this->stmt->error_list, true));
+        if (!$this->stmt->execute()) {
+            $this->throwError();
         }
         $this->dynamicBindResults();
         $this->reset();
@@ -545,100 +551,20 @@ class Model extends \mysqli
      * @return Model Returns the $this->stmt object.
      * @throws \Exception
      */
-    protected function buildQuery($tableData = null): self
+    protected function buildQuery(array $tableData = []): self
     {
-        $hasTableData = \is_array($tableData);
+        $hasTableData = \is_array($tableData) && !empty($tableData);
         $hasConditional = !empty($this->where);
 
         // Did the user call the "join" method?
         $this->makeJoin();
-
-        // Did the user call the "where" method?
-        if (!empty($this->where)) {
-            // if update data was passed, filter through and create the SQL query, accordingly.
-            if ($hasTableData) {
-                $pos = \strpos($this->query, 'UPDATE');
-                if (false !== $pos) {
-                    foreach ($tableData as $prop => $value) {
-                        // determines what data type the item is, for binding purposes.
-                        $this->paramTypeList .= $this->determineType($value);
-
-                        // prepares the reset of the SQL query.
-                        $this->query .= ($prop . ' = ?, ');
-                    }
-                    $this->query = \rtrim($this->query, ', ');
-                }
-            }
-
-            //Prepare the where portion of the query
-            $this->query .= ' WHERE ';
-            foreach ($this->where as $column => $value) {
-                $comparison = ' = ? ';
-                if (\is_array($value)) {
-                    // if the value is an array, then this isn't a basic = comparison
-                    $key = \key($value);
-                    $val = $value[$key];
-                    switch (\strtolower($key)) {
-                        case 'in':
-                            $comparison = ' IN (';
-                            foreach ($val as $v) {
-                                $comparison .= ' ?,';
-                                $this->whereTypeList .= $this->determineType($v);
-                            }
-                            $comparison = \rtrim($comparison, ',') . ' ) ';
-                            break;
-                        case 'between':
-                            $comparison = ' BETWEEN ? AND ? ';
-                            $this->whereTypeList .= $this->determineType($val[0]);
-                            $this->whereTypeList .= $this->determineType($val[1]);
-                            break;
-                        default:
-                            // We are using a comparison operator with only one parameter after it
-                            $comparison = ' ' . $key . ' ? ';
-                            // Determines what data type the where column is, for binding purposes.
-                            $this->whereTypeList .= $this->determineType($val);
-                    }
-                } else {
-                    // Determines what data type the where column is, for binding purposes.
-                    $this->whereTypeList .= $this->determineType($value);
-                }
-                // Prepares the reset of the SQL query.
-                $this->query .= ($column . $comparison . ' AND ');
-            }
-            $this->query = \rtrim($this->query, ' AND ');
-        }
-
-        // Did the user call the "customWhere" method?
+        $this->makeWhere($tableData, $hasTableData);
         $this->makeCustomWhere();
         $this->makeGroupBy();
         $this->makeOrderBy();
 
-
-        // Determine if is INSERT query
         if ($hasTableData) {
-            $pos = \strpos($this->query, 'INSERT');
-
-            if ($pos !== false) {
-                //is insert statement
-                $keys = \array_keys($tableData);
-                $values = \array_values($tableData);
-                $num = \count($keys);
-
-                // wrap values in quotes
-                foreach ($values as $key => $val) {
-                    $values[$key] = "'{$val}'";
-                    $this->paramTypeList .= $this->determineType($val);
-                }
-
-                $this->query .= '(' . \implode($keys, ', ') . ')';
-                $this->query .= ' VALUES(';
-                while ($num !== 0) {
-                    $this->query .= '?, ';
-                    $num--;
-                }
-                $this->query = \rtrim($this->query, ', ');
-                $this->query .= ')';
-            }
+            $this->prepareInsert($tableData);
         }
         $this->makeLimit();
 
@@ -646,9 +572,7 @@ class Model extends \mysqli
         // Prepare query
         $this->stmt = $this->prepare($this->query);
         if (!$this->stmt) {
-            $this->setLastError($this->sqlstate . ' ' . $this->error);
-            $this->db_result = false;
-            throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error);
+            $this->throwError();
         }
 
         // Prepare table data bind parameters
@@ -684,8 +608,7 @@ class Model extends \mysqli
         }
 
         // Bind parameters to statement
-        if ($hasTableData || $hasConditional)
-        {
+        if ($hasTableData || $hasConditional) {
             \call_user_func_array([$this->stmt, 'bind_param'], $this->refValues($this->bindParams));
         }
         return $this;
@@ -954,5 +877,109 @@ class Model extends \mysqli
         $this->query .= ' LIMIT ' . $this->offset . ',' . $this->limit;
         return $this;
     }
+
+    /**
+     * @param $tableData
+     * @param $hasTableData
+     * @return self
+     */
+    protected function makeWhere($tableData, $hasTableData): self
+    {
+        if (empty($this->where)) {
+            return $this;
+        }
+        // if update data was passed, filter through and create the SQL query, accordingly.
+        if ($hasTableData) {
+            $pos = \strpos($this->query, 'UPDATE');
+            if (false !== $pos) {
+                foreach ($tableData as $prop => $value) {
+                    // determines what data type the item is, for binding purposes.
+                    $this->paramTypeList .= $this->determineType($value);
+
+                    // prepares the reset of the SQL query.
+                    $this->query .= ($prop . ' = ?, ');
+                }
+                $this->query = \rtrim($this->query, ', ');
+            }
+        }
+
+        //Prepare the where portion of the query
+        $this->query .= ' WHERE ';
+        foreach ($this->where as $column => $value) {
+            $comparison = ' = ? ';
+            if (\is_array($value)) {
+                // if the value is an array, then this isn't a basic = comparison
+                $key = \key($value);
+                $val = $value[$key];
+                switch (\strtolower($key)) {
+                    case 'in':
+                        $comparison = ' IN (';
+                        foreach ($val as $v) {
+                            $comparison .= ' ?,';
+                            $this->whereTypeList .= $this->determineType($v);
+                        }
+                        $comparison = \rtrim($comparison, ',') . ' ) ';
+                        break;
+                    case 'between':
+                        $comparison = ' BETWEEN ? AND ? ';
+                        $this->whereTypeList .= $this->determineType($val[0]);
+                        $this->whereTypeList .= $this->determineType($val[1]);
+                        break;
+                    default:
+                        $comparison = ' ' . $key . ' ? ';
+                        $this->whereTypeList .= $this->determineType($val);
+                }
+            } else {
+                $this->whereTypeList .= $this->determineType($value);
+            }
+            $this->query .= ($column . $comparison . ' AND ');
+        }
+        $this->query = \rtrim($this->query, ' AND ');
+        return  $this;
+    }
+
+    /**
+     * @param array $tableData
+     * @return self
+     */
+    protected function prepareInsert(array $tableData): self
+    {
+        $pos = \strpos($this->query, 'INSERT');
+        if (!$pos) {
+            return $this;
+        }
+
+        $keys = \array_keys($tableData);
+        $values = \array_values($tableData);
+        $num = \count($keys);
+
+        // wrap values in quotes
+        foreach ($values as $key => $val) {
+            $values[$key] = "'{$val}'";
+            $this->paramTypeList .= $this->determineType($val);
+        }
+
+        $this->query .= '(' . \implode($keys, ', ') . ')';
+        $this->query .= ' VALUES(';
+        while ($num !== 0) {
+            $this->query .= '?, ';
+            $num--;
+        }
+        $this->query = \rtrim($this->query, ', ');
+        $this->query .= ')';
+
+        return $this;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function throwError()
+    {
+        $this->setLastError($this->sqlstate . ' ' . $this->error);
+        $this->db_result = false;
+        throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error . ' ' . print_r($this->stmt->error_list, true));
+    }
+
 
 }
