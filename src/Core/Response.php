@@ -31,7 +31,7 @@ class Response
     /**
      * 404 error
      */
-    public static function error404()
+    public static function error404(): void
     {
         self::applyHeader('HTTP/1.0 404 Not Found', 404);
     }
@@ -39,7 +39,7 @@ class Response
     /**
      * 503 error
      */
-    public static function error503()
+    public static function error503(): void
     {
         self::applyHeader('HTTP/1.1 503 Service Temporarily Unavailable');
         self::applyHeader('Status: 503 Service Temporarily Unavailable');
@@ -49,7 +49,7 @@ class Response
     /**
      * 503 error
      */
-    public static function error400()
+    public static function error400(): void
     {
         self::applyHeader('HTTP/1.1 400 BAD REQUEST', 400);
     }
@@ -58,7 +58,8 @@ class Response
      * @param string $contentType
      * @param string $charset
      */
-    public static function applyContentType($contentType = '', $charset = '') {
+    public static function applyContentType($contentType = '', $charset = ''): void
+    {
         if (empty($contentType)) {
             $contentType = self::$contentType;
         }
@@ -81,7 +82,8 @@ class Response
     /**
      * @param bool $noCache
      */
-    public static function applyNoCache($noCache = false) {
+    public static function applyNoCache($noCache = false)
+    {
         if ($noCache || self::$isNoCache) {
             self::applyHeader('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
             self::applyHeader('Pragma: no-cache');
@@ -90,11 +92,24 @@ class Response
     }
 
     /**
+     * @param $out
+     *
+     * @return string
+     */
+    public static function json($out): string
+    {
+        Response::applyContentType(Mime::JSON, 'utf-8');
+        Response::applyNoCache(true);
+        return \json_encode($out);
+    }
+
+    /**
      * Применяет http заголовок
      *
      * @param string $header
-     * @param int $code
-     * @param bool $replace
+     * @param int    $code
+     * @param bool   $replace
+     *
      * @return bool
      */
     private static function applyHeader(string $header, int $code = null, bool $replace = true): bool

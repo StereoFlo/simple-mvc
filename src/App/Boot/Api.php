@@ -2,7 +2,6 @@
 
 namespace App\Boot;
 
-use Core\Mime;
 use Core\Response;
 
 /**
@@ -14,13 +13,11 @@ class Api extends AbstractBoot
     /**
      * @param $out
      *
-     * @return bool
+     * @return string
      */
-    public static function run($out): bool
+    public static function run($out)
     {
-        Response::applyContentType(Mime::JSON, 'utf-8');
-        Response::applyNoCache(true);
-        print \json_encode($out);
+        print Response::json($out);
         return true;
     }
 }

@@ -40,6 +40,7 @@ class Router
      * @param string $route
      *
      * @return Router
+     * @throws \Exception
      */
     public static function create(string $method, string $route)
     {
@@ -68,15 +69,15 @@ class Router
      * @param string $method
      * @param string $route
      *
-     * @return Router
+     * @throws \Exception
      */
     private function __construct(string $method, string $route)
     {
         $this->method = $method;
-        $this->route = $route;
-        $router = Config::getConfig('router');
-        $main = Config::getConfig('main');
-        $this->config = $router + $main;
+        $this->route  = $this->cleanRoute($route);
+        $router       = Config::getConfig('router');
+        $main         = Config::getConfig('main');
+        $this->config = array_merge($router, $main);
         if (\preg_match(Utils::getProperty($router, 'staticFileExtensions'), $route)) {
             return $this;
         }
@@ -173,7 +174,7 @@ class Router
      */
     private function getControllerPath(string $controller): string
     {
-        $path = Utils::getProperty($this->config, SRC_DIR) . DS . $this->prepareForPath($controller) . \PHP_EXTENSION;
+        $path = SRC_DIR . DS . $this->prepareForPath($controller) . \PHP_EXTENSION;
         if (!\file_exists($path)) {
             throw new \Exception('Controller path not found');
         }
@@ -190,5 +191,20 @@ class Router
     {
         $namespace = $this->prepareForNs($controller);
         return $namespace;
+    }
+
+    /**
+     * @param $route
+     *
+     * @return string
+     */
+    private function cleanRoute($route): string
+    {
+        if (false === strpos($route, '?')) {
+            return $route;
+        }
+
+        $tmp = explode('?', $route);
+        return $tmp[0];
     }
 }

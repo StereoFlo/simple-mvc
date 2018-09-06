@@ -122,6 +122,7 @@ class Application
 
     /**
      * @return Router
+     * @throws Exception
      */
     private static function getRouter()
     {

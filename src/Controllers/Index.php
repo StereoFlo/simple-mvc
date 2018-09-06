@@ -17,7 +17,7 @@ class Index extends Controller
      */
     public static function index()
     {
-        $get = Request::create()->get()->all();
+        $get = Request::create()->get();
         return self::view('index', $get);
     }
 
