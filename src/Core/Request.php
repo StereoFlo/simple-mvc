@@ -2,7 +2,7 @@
 
 namespace Core;
 
-use App\Utils;
+use Core\Request\Bag;
 
 /**
  * Class Input
@@ -11,42 +11,44 @@ use App\Utils;
 class Request
 {
     /**
-     * @param string $key
-     * @return string|null
+     * @return Request
      */
-    public static function takeGet(string $key = '')
+    public static function create(): self
     {
-        if (empty($key)) {
-            return $_GET;
-        }
-        return Utils::getProperty($_GET, $key);
+        return new self();
     }
 
     /**
-     * @param string|null $key
-     * @return string|null
+     * @return Bag
      */
-    public static function takePost(string $key = '')
+    public function post(): Bag
     {
-        if (empty($key)) {
-            return $_POST;
-        }
-        return Utils::getProperty($_POST, $key);
+        return $this->getBag($_POST);
     }
 
     /**
-     * @return bool
+     * @return Bag
      */
-    public static function hasPost()
+    public function get(): Bag
     {
-        return !empty($_POST);
+        return $this->getBag($_GET);
     }
 
     /**
-     * @return bool
+     * @return Bag
      */
-    public static function hasGet()
+    public function files(): Bag
     {
-        return !empty($_GET);
+        return $this->getBag($_FILES);
+    }
+
+    /**
+     * @param array $currentArray
+     *
+     * @return Bag
+     */
+    private function getBag(array $currentArray): Bag
+    {
+        return new Bag($currentArray);
     }
 }

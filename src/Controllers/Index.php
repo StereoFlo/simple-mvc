@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Core\Controller;
+use Core\Request;
 
 /**
  * Class Index
@@ -12,10 +13,12 @@ class Index extends Controller
 {
     /**
      * @return bool
+     * @throws \Exception
      */
     public static function index()
     {
-        return self::view('index');
+        $get = Request::create()->get()->all();
+        return self::view('index', $get);
     }
 
     /**
