@@ -50,7 +50,7 @@ class Application
 
         if (!\file_exists($filePath)) {
             $flag = false;
-            return $this->recursiveAutoload($file, $path, $ext, $flag);
+            return $this->recursiveAutoload($file, $path, $flag);
         }
         if (false === $ext) {
             require_once($filePath);
@@ -66,19 +66,19 @@ class Application
      * @param bool $flag
      * @return string
      */
-    private function recursiveAutoload(string $file, string $path, string $ext = \PHP_EXTENSION, bool &$flag): string
+    private function recursiveAutoload(string $file, string $path, bool &$flag): string
     {
         $res = '';
         if (false !== ($handle = \opendir($path)) && $flag) {
             while (false !== ($dir = \readdir($handle)) && $flag) {
                 if (false === \strpos($dir, '.')) {
                     $path2 = $path . DS . $dir;
-                    $filePath = $path2 . DS . $file . $ext;
+                    $filePath = $path2 . DS . $file . \PHP_EXTENSION;
                     if (!\file_exists($filePath)) {
-                        $res = $this->recursiveAutoload($file, $path2, $ext, $flag);
+                        $res = $this->recursiveAutoload($file, $path2, $flag);
                     }
                     $flag = false;
-                    if (false === $ext) {
+                    if (false === \PHP_EXTENSION) {
                         require_once($filePath);
                         break;
                     }
