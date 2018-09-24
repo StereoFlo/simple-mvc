@@ -43,6 +43,14 @@ class Request
     }
 
     /**
+     * @return Bag
+     */
+    public function server(): Bag
+    {
+        return $this->getBag($_SERVER);
+    }
+
+    /**
      * @param array $currentArray
      *
      * @return Bag
