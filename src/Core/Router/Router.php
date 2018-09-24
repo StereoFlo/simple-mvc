@@ -38,6 +38,17 @@ class Router
     protected $params;
 
     /**
+     * @param Request $request
+     *
+     * @return Router
+     * @throws \Exception
+     */
+    public static function create(Request $request): self
+    {
+        return new self($request);
+    }
+
+    /**
      * Router constructor.
      *
      * @param Request $request
