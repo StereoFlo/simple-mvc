@@ -43,7 +43,7 @@ class Application
      *
      * @return string
      */
-    private function loader(string $file, bool $ext = false, bool $dir = false)
+    private function loader(string $file, bool $ext = false, bool $dir = false): string
     {
         $file = \str_replace('\\', '/', $file);
         list($path, $filePath) = $this->getPaths($file, $ext, $dir);

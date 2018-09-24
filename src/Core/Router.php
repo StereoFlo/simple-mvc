@@ -121,7 +121,7 @@ class Router
      *
      * @return mixed
      */
-    private function call($callback = [], $args = [])
+    private function call(array $callback = [], array $args = [])
     {
         return \call_user_func_array($callback, $args);
     }
