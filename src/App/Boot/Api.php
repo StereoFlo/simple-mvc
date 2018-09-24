@@ -2,6 +2,7 @@
 
 namespace App\Boot;
 
+use Core\Mime;
 use Core\Response;
 
 /**
@@ -13,11 +14,11 @@ class Api extends AbstractBoot
     /**
      * @param $out
      *
-     * @return string
+     * @return bool
      */
     public static function run($out)
     {
-        print Response::json($out);
+        print Response::create($out, Mime::JSON)->json();
         return true;
     }
 }

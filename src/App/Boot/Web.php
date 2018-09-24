@@ -2,7 +2,6 @@
 
 namespace App\Boot;
 
-use Core\Mime;
 use Core\Response;
 
 /**
@@ -18,8 +17,6 @@ class Web extends AbstractBoot
      */
     public static function run($out)
     {
-        Response::applyContentType(Mime::HTML, 'utf-8');
-        Response::applyNoCache(true);
-        return $out;
+        return Response::create($out)->html();
     }
 }

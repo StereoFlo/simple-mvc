@@ -8,99 +8,125 @@ namespace Core;
  */
 class Response
 {
-    /**
-     * @var bool
-     */
-    private static $isHtmlResponse = true;
-
-    /**
-     * @var string
-     */
-    private static $contentType;
-
-    /**
-     * @var string
-     */
-    private static $charset;
+    const DEFAULT_CHARSET = 'UTF-8';
 
     /**
      * @var bool
      */
-    private static $isNoCache = false;
+    protected $isHtmlResponse = true;
+
+    /**
+     * @var string
+     */
+    protected $contentType;
+
+    /**
+     * @var string
+     */
+    protected $charset;
+
+    /**
+     * @var bool
+     */
+    protected $isNoCache = false;
+
+    /**
+     * @var mixed
+     */
+    protected $data;
+
+    /**
+     * @param        $data
+     * @param string $contentType
+     * @param string $charset
+     *
+     * @return Response
+     */
+    public static function create($data, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET): self
+    {
+        return new self($data, $contentType, $charset);
+    }
+
+    /**
+     * Response constructor.
+     *
+     * @param        $data
+     * @param string $contentType
+     * @param string $charset
+     */
+    public function __construct($data, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
+    {
+        $this->data        = $data;
+        $this->contentType = $contentType;
+        $this->charset     = $charset;
+    }
 
     /**
      * 404 error
      */
-    public static function error404(): void
+    public function error404(): void
     {
-        self::applyHeader('HTTP/1.0 404 Not Found', 404);
+        $this->applyHeader('HTTP/1.0 404 Not Found', 404);
     }
 
     /**
      * 503 error
      */
-    public static function error503(): void
+    public function error503(): void
     {
-        self::applyHeader('HTTP/1.1 503 Service Temporarily Unavailable');
-        self::applyHeader('Status: 503 Service Temporarily Unavailable');
-        self::applyHeader('Retry-After: 300');
+        $this->applyHeader('HTTP/1.1 503 Service Temporarily Unavailable');
+        $this->applyHeader('Status: 503 Service Temporarily Unavailable');
+        $this->applyHeader('Retry-After: 300');
     }
 
     /**
      * 503 error
      */
-    public static function error400(): void
+    public function error400(): void
     {
-        self::applyHeader('HTTP/1.1 400 BAD REQUEST', 400);
+        $this->applyHeader('HTTP/1.1 400 BAD REQUEST', 400);
     }
 
     /**
-     * @param string $contentType
-     * @param string $charset
+     * applyContentType
      */
-    public static function applyContentType($contentType = '', $charset = ''): void
+    public function applyContentType(): void
     {
-        if (empty($contentType)) {
-            $contentType = self::$contentType;
-        }
-        if (empty($charset)) {
-            $charset = self::$charset;
-        }
-        if (empty($contentType)) {
-            return;
-        }
-        if ($charset) {
-            $str = $contentType . '; charset=' . $charset;
-        } else {
-            $str = $contentType;
-        }
-        self::$isHtmlResponse = self::$contentType === Mime::HTML;
-        self::applyHeader('Content-Type: ' . $str);
-        self::$contentType = null;
+        $this->isHtmlResponse = $this->contentType === Mime::HTML;
+        $this->applyHeader('Content-Type: ' . $this->contentType . '; charset=' . $this->charset);
+        $this->contentType = null;
     }
 
     /**
      * @param bool $noCache
      */
-    public static function applyNoCache($noCache = false)
+    public function applyNoCache($noCache = false)
     {
-        if ($noCache || self::$isNoCache) {
-            self::applyHeader('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-            self::applyHeader('Pragma: no-cache');
-            self::$isNoCache = null;
+        if ($noCache || $this->isNoCache) {
+            $this->applyHeader('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+            $this->applyHeader('Pragma: no-cache');
+            $this->isNoCache = null;
         }
     }
 
     /**
-     * @param $out
-     *
+     * @return mixed
+     */
+    public function html()
+    {
+        $this->applyContentType();
+        $this->applyNoCache(true);
+        return $this->data;
+    }
+
+    /**
      * @return string
      */
-    public static function json($out): string
+    public function json(): string
     {
-        Response::applyContentType(Mime::JSON, 'utf-8');
-        Response::applyNoCache(true);
-        return \json_encode($out);
+        $this->applyContentType();
+        $this->applyNoCache(true);
+        return \json_encode($this->data);
     }
 
     /**
@@ -112,7 +138,7 @@ class Response
      *
      * @return bool
      */
-    private static function applyHeader(string $header, int $code = null, bool $replace = true): bool
+    protected function applyHeader(string $header, int $code = null, bool $replace = true): bool
     {
         if (\headers_sent()) {
             return false;

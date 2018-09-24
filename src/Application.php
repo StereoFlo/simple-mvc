@@ -105,16 +105,16 @@ class Application
                     return Api::run($router->getOut());
                     break;
                 default:
-                    Response::error503();
+                    Response::create(null)->error503();
                     break;
             }
         } catch (Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
-            Response::error503();
+            Response::create(null)->error503();
             return false;
         } catch (Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            Response::error503();
+            Response::create(null)->error503();
             return false;
         }
         return false;
