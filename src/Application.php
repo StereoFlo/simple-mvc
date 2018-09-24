@@ -108,11 +108,11 @@ class Application
                     Response::create(null)->error503();
                     break;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
             Response::create(null)->error503();
             return false;
-        } catch (Throwable $t) {
+        } catch (\Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
             Response::create(null)->error503();
             return false;
