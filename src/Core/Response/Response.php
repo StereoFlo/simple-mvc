@@ -45,7 +45,7 @@ class Response implements ResponseInterface
      *
      * @return static
      */
-    public static function create($data, $httpCode = 200, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
+    public static function create($data = null, $httpCode = 200, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
     {
         return new static($data, $httpCode, $contentType, $charset);
     }
@@ -58,7 +58,7 @@ class Response implements ResponseInterface
      * @param string $contentType
      * @param string $charset
      */
-    public function __construct($data, $httpCode = 200, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
+    public function __construct($data = null, $httpCode = 200, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
     {
         static::$data        = $data;
         static::$httpCode    = $httpCode;

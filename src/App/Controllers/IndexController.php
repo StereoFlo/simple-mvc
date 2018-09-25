@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use Core\Controller;
+use Core\Request\Request;
 use Core\Response\Response;
 
 /**
@@ -12,11 +13,14 @@ use Core\Response\Response;
 class IndexController extends Controller
 {
     /**
-     * @throws \Exception
+     * @param Request $request
+     *
+     * @return Response
      */
-    public static function index(): Response
+    public static function index(Request $request): Response
     {
-        return Response::create('privet');
+        $test = $request->get()->get('test', 'null');
+        return Response::create($test);
     }
 
     /**

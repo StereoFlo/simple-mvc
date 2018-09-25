@@ -1,6 +1,6 @@
 <?php
 
-namespace Models;
+namespace App\Models;
 
 use Core\Model;
 
@@ -8,6 +8,7 @@ class TestModel extends Model
 {
     /**
      * @return self
+     * @throws \Exception
      */
     public static function create(): self
     {
