@@ -117,11 +117,13 @@ class Application
     }
 
     /**
+     * @param $controller
+     * @param $action
+     *
      * @return array
      * @throws ReflectionException
-     * @throws Exception
      */
-    private function di($controller, $action): array
+    private function di(string $controller, string $action): array
     {
         $params1 = [];
         $method = new ReflectionMethod($controller, $action);
