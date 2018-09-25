@@ -72,6 +72,11 @@ class Application
     private function run()
     {
         try {
+            if (empty($this->router->getRoute())) {
+                Response::create('404 not found', 404)->send();
+                return false;
+            }
+
             if ($this->router->getRoute()->getMethod() !== $this->request->server()->getMethod()) {
                 throw new \Exception('this method is not allowed here');
             }
@@ -85,7 +90,10 @@ class Application
             }
 
             $ref = new ReflectionClass($this->router->getRoute()->getController());
-            $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
+            $resolveConstructorParams = [];
+            if (!empty($ref->getConstructor())) {
+                $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
+            }
 
             $params = $this->di($this->router->getRoute()->getController(), $this->router->getRoute()->getAction());
             $class  = $ref->newInstanceArgs($resolveConstructorParams);

@@ -64,9 +64,9 @@ class Router
     }
 
     /**
-     * @return Route
+     * @return Route|null
      */
-    public function getRoute(): Route
+    public function getRoute(): ?Route
     {
         return $this->route;
     }
