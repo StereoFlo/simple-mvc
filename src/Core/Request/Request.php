@@ -11,12 +11,12 @@ class Request
     /**
      * @var Bag
      */
-    protected $post;
+    protected $request;
 
     /**
      * @var Bag
      */
-    protected $get;
+    protected $query;
 
     /**
      * @var Bag
@@ -27,6 +27,11 @@ class Request
      * @var Bag
      */
     protected $server;
+
+    /**
+     * @var Bag
+     */
+    protected $cookie;
 
     /**
      * @return Request
@@ -41,26 +46,27 @@ class Request
      */
     public function __construct()
     {
-        $this->post   = new Bag($_POST);
-        $this->get    = new Bag($_GET);
-        $this->files  = new Bag($_FILES);
-        $this->server = new ServerBag($_SERVER);
+        $this->request = new Bag($_POST);
+        $this->query   = new Bag($_GET);
+        $this->files   = new Bag($_FILES);
+        $this->server  = new ServerBag($_SERVER);
+        $this->cookie  = new Bag($_COOKIE);
     }
 
     /**
      * @return Bag
      */
-    public function post(): Bag
+    public function request(): Bag
     {
-        return $this->post;
+        return $this->request;
     }
 
     /**
      * @return Bag
      */
-    public function get(): Bag
+    public function query(): Bag
     {
-        return $this->get;
+        return $this->query;
     }
 
     /**
@@ -77,5 +83,13 @@ class Request
     public function server(): ServerBag
     {
         return $this->server;
+    }
+
+    /**
+     * @return Bag
+     */
+    public function getCookie(): Bag
+    {
+        return $this->cookie;
     }
 }

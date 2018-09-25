@@ -19,7 +19,7 @@ class IndexController extends Controller
      */
     public static function index(Request $request): Response
     {
-        $test = $request->get()->get('test', 'null');
+        $test = $request->query()->get('test', 'null');
         return Response::create($test);
     }
 
