@@ -12,7 +12,9 @@ class Logger
 {
     /**
      * @param string $message
+     *
      * @return bool
+     * @throws \Exception
      */
     public static function logToFile(string $message = ''): bool
     {

@@ -3,7 +3,8 @@
 
 namespace Core\Router;
 
-use Core\Request;
+use Core\Request\Bag;
+use Core\Request\Request;
 
 /**
  * Class RequestedData
@@ -27,7 +28,7 @@ class RequestedData
     protected $uriOrig;
 
     /**
-     * @var Request\Bag
+     * @var Bag
      */
     protected $server;
 

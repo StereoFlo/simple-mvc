@@ -4,6 +4,10 @@ namespace Core;
 
 use App\Utils;
 
+/**
+ * Class Model
+ * @package Core
+ */
 class Model extends \mysqli
 {
     /**
@@ -123,12 +127,12 @@ class Model extends \mysqli
      */
     public function __construct()
     {
-        $config = Config::getConfig('main', 'database');
-        $host = Utils::getProperty($config, 'host');
-        $dbUser = Utils::getProperty($config, 'user');
-        $dbPassword = Utils::getProperty($config, 'password');
-        $dbName = Utils::getProperty($config, 'basename');
-        $port = Utils::getProperty($config, 'port', ini_get('mysqli.default_port'));
+        $config          = Config::getConfig('main', 'database');
+        $host            = Utils::getProperty($config, 'host');
+        $dbUser          = Utils::getProperty($config, 'user');
+        $dbPassword      = Utils::getProperty($config, 'password');
+        $dbName          = Utils::getProperty($config, 'basename');
+        $port            = Utils::getProperty($config, 'port', ini_get('mysqli.default_port'));
         $this->db_prefix = Utils::getProperty($config, 'prefix', '');
         parent::__construct($host, $dbUser, $dbPassword, $dbName, $port, $this->db_prefix);
         if ($this->connect_errno) {

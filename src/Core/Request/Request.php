@@ -1,8 +1,6 @@
 <?php
 
-namespace Core;
-
-use Core\Request\Bag;
+namespace Core\Request;
 
 /**
  * Class Input

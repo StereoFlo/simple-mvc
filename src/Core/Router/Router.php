@@ -2,7 +2,7 @@
 
 namespace Core\Router;
 
-use Core\Request;
+use Core\Request\Request;
 use Core\Request\Bag;
 use Core\Router\Collection\Route;
 
