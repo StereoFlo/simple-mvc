@@ -130,10 +130,11 @@ class Application
      *
      * @return array
      * @throws ReflectionException
+     * @throws Exception
      */
     private function di(string $controller, string $action): array
     {
-        $params1 = [];
+        $result = [];
         $method = new ReflectionMethod($controller, $action);
         $params = $method->getParameters();
         if (empty($params)) {
@@ -147,10 +148,10 @@ class Application
                 if (null === $this->container->get($param->getType()->getName())) {
                     $this->container->set($param->getType()->getName());
                 }
-                $params1[$param->getPosition()] = $this->container->get($param->getType()->getName());
-                $params1 = array_merge($params1, $this->router->getParams());
+                $result[$param->getPosition()] = $this->container->get($param->getType()->getName());
+                $result = array_merge($result, $this->router->getParams());
             }
         }
-        return $params1;
+        return $result;
     }
 }
