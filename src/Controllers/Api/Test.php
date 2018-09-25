@@ -3,6 +3,7 @@
 namespace Controllers\Api;
 
 use Core\Controller;
+use Core\Response;
 
 /**
  * Class Index
@@ -12,6 +13,6 @@ class Test extends Controller
 {
     public static function index()
     {
-        return ['test'];
+        return Response::create(['test' => 'json']);
     }
 }

@@ -125,6 +125,7 @@ class Response
      */
     public function json(): void
     {
+        $this->contentType = Mime::JSON;
         $this->applyContentType();
         $this->applyNoCache(true);
         print \json_encode($this->data);
