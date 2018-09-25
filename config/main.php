@@ -2,7 +2,6 @@
 
 return [
     'viewPath'     => SRC_DIR . DS . 'Views',
-    'packagesPath' => SRC_DIR . DS . 'Packages',
 
     /**
      *  Logger config
