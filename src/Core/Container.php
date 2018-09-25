@@ -15,21 +15,16 @@ class Container
 
     /**
      * @param string $abstract
-     * @param null   $concrete
      *
      * @return Container
      */
-    public function set(string $abstract, $concrete = null): self
+    public function set(string $abstract): self
     {
-        if (null === $concrete) {
-            $concrete = $abstract;
-        }
-
         if (isset($this->stack[$abstract])) {
             return $this;
         }
 
-        $this->stack[$abstract] = $concrete;
+        $this->stack[$abstract] = $abstract;
         return $this;
     }
 
@@ -57,7 +52,7 @@ class Container
      * @throws \ReflectionException
      * @throws \Exception
      */
-    private function build($concrete, $parameters)
+    private function build(string $concrete, array $parameters)
     {
         if ($concrete instanceof \Closure) {
             return $concrete($this, $parameters);
