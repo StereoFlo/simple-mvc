@@ -1,6 +1,7 @@
 <?php
 
 use Core\Logger;
+use Core\Request\Request;
 use Core\Response\Response;
 use Core\Response\ResponseInterface;
 use Core\Router\Router;
@@ -11,6 +12,14 @@ use Core\Router\Router;
  */
 class Application
 {
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var Router
+     */
     private $router;
 
     /**
@@ -21,26 +30,29 @@ class Application
     /**
      * Static call
      *
-     * @param Router $router
+     * @param Request $request
+     * @param Router                $router
      *
      * @return Application
      * @throws Exception
      */
-    public static function create(Router $router)
+    public static function create(Request $request, Router $router)
     {
-        return new self($router);
+        return new self($request, $router);
     }
 
     /**
      * Autoloader constructor.
      *
-     * @param Router $router
+     * @param Request $request
+     * @param Router  $router
      *
      * @throws Exception
      */
-    private function __construct(Router $router)
+    private function __construct(Request $request, Router $router)
     {
-        $this->router = $router;
+        $this->request = $request;
+        $this->router  = $router;
         return $this->run();
     }
 
@@ -51,6 +63,10 @@ class Application
     private function run()
     {
         try {
+            if ($this->router->getRoute()->getMethod() !== $this->request->server()->getMethod()) {
+                throw new \Exception('this method is not allowed here');
+            }
+
             if (!\file_exists($this->getControllerPath())) {
                 throw new \Exception('file doesnot found');
             }
@@ -68,11 +84,11 @@ class Application
 
         } catch (\Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
-            Response::create('service unavailable', 500);
+            Response::create('service unavailable', 500)->send();
             return false;
         } catch (\Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            Response::create('service unavailable', 500);
+            Response::create('service unavailable', 500)->send();
             return false;
         }
     }

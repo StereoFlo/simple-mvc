@@ -9,6 +9,26 @@ namespace Core\Request;
 class Request
 {
     /**
+     * @var Bag
+     */
+    protected $post;
+
+    /**
+     * @var Bag
+     */
+    protected $get;
+
+    /**
+     * @var Bag
+     */
+    protected $files;
+
+    /**
+     * @var Bag
+     */
+    protected $server;
+
+    /**
      * @return Request
      */
     public static function create(): self
@@ -17,11 +37,22 @@ class Request
     }
 
     /**
+     * Request constructor.
+     */
+    public function __construct()
+    {
+        $this->post   = new Bag($_POST);
+        $this->get    = new Bag($_GET);
+        $this->files  = new Bag($_FILES);
+        $this->server = new ServerBag($_SERVER);
+    }
+
+    /**
      * @return Bag
      */
     public function post(): Bag
     {
-        return $this->getBag($_POST);
+        return $this->post;
     }
 
     /**
@@ -29,7 +60,7 @@ class Request
      */
     public function get(): Bag
     {
-        return $this->getBag($_GET);
+        return $this->get;
     }
 
     /**
@@ -37,24 +68,14 @@ class Request
      */
     public function files(): Bag
     {
-        return $this->getBag($_FILES);
+        return $this->files;
     }
 
     /**
-     * @return Bag
+     * @return ServerBag
      */
-    public function server(): Bag
+    public function server(): ServerBag
     {
-        return $this->getBag($_SERVER);
-    }
-
-    /**
-     * @param array $currentArray
-     *
-     * @return Bag
-     */
-    private function getBag(array $currentArray): Bag
-    {
-        return new Bag($currentArray);
+        return $this->server;
     }
 }
