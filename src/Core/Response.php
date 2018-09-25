@@ -110,23 +110,25 @@ class Response
     }
 
     /**
-     * @return mixed
+     * @return void
      */
-    public function html()
+    public function html(): void
     {
         $this->applyContentType();
         $this->applyNoCache(true);
-        return $this->data;
+        print $this->data;
+        return;
     }
 
     /**
-     * @return string
+     * @return void
      */
-    public function json(): string
+    public function json(): void
     {
         $this->applyContentType();
         $this->applyNoCache(true);
-        return \json_encode($this->data);
+        print \json_encode($this->data);
+        return;
     }
 
     /**

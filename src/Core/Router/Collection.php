@@ -64,7 +64,11 @@ class Collection
             return $this;
         }
         foreach ($routes as $path => $routeData) {
-            $this->stack[] = new Route($path, Utils::getProperty($routeData, 'method'), Utils::getProperty($routeData, 'action'), Utils::getProperty($routeData, 'mode'));
+            $controller = Utils::getProperty($routeData, 'controller');
+            $method     = Utils::getProperty($routeData, 'method');
+            $action     = Utils::getProperty($routeData, 'action');
+            $mode       = Utils::getProperty($routeData, 'mode');
+            $this->addRoute(new Route($path, $controller, $method, $action, $mode));
         }
         return $this;
     }

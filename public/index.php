@@ -1,3 +1,6 @@
 <?php
 include_once '../src/bootstrap.php';
-Application::run();
+
+$request = \Core\Request::create();
+$router  = \Core\Router\Router::create($request);
+Application::create($router);

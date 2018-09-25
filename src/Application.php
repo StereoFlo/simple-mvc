@@ -1,113 +1,71 @@
 <?php
 
-use App\Boot\Api;
-use App\Boot\Web;
 use Core\Logger;
 use Core\Response;
-use Core\Router;
+use Core\Router\Router;
+
 
 /**
  * Class Autoloader
  */
 class Application
 {
+    private $router;
+
     /**
      * Modes
      */
-    const MODE_API = 1,
-          MODE_WEB = 2;
+    const MODE_API = 1, MODE_WEB = 2;
 
     /**
      * Static call
      *
+     * @param Router $router
+     *
      * @return Application
      */
-    public static function run()
+    public static function create(Router $router)
     {
-        return new self();
+        return new self($router);
     }
 
     /**
      * Autoloader constructor.
-     */
-    private function __construct()
-    {
-        \spl_autoload_register([$this, 'loader']);
-        return $this->runner();
-    }
-
-    /**
-     * @param string $file
-     * @param bool   $ext
-     * @param bool   $dir
      *
-     * @return string
+     * @param Router $router
      */
-    private function loader(string $file, bool $ext = false, bool $dir = false): string
+    private function __construct(Router $router)
     {
-        $file = \str_replace('\\', '/', $file);
-        list($path, $filePath) = $this->getPaths($file, $ext, $dir);
-
-        if (!\file_exists($filePath)) {
-            $flag = false;
-            return $this->recursiveAutoload($file, $path, $flag);
-        }
-        if (false === $ext) {
-            require_once($filePath);
-            return '';
-        }
-        return $filePath;
-    }
-
-    /**
-     * @param string $file
-     * @param string $path
-     * @param string $ext
-     * @param bool $flag
-     * @return string
-     */
-    private function recursiveAutoload(string $file, string $path, bool &$flag): string
-    {
-        $res = '';
-        if (false !== ($handle = \opendir($path)) && $flag) {
-            while (false !== ($dir = \readdir($handle)) && $flag) {
-                if (false === \strpos($dir, '.')) {
-                    $path2 = $path . DS . $dir;
-                    $filePath = $path2 . DS . $file . \PHP_EXTENSION;
-                    if (!\file_exists($filePath)) {
-                        $res = $this->recursiveAutoload($file, $path2, $flag);
-                    }
-                    $flag = false;
-                    if (false === \PHP_EXTENSION) {
-                        require_once($filePath);
-                        break;
-                    }
-                    return $filePath;
-                }
-            }
-            \closedir($handle);
-        }
-        return $res;
+        $this->router = $router;
+        return $this->run();
     }
 
     /**
      * @return mixed
      */
-    private function runner()
+    private function run()
     {
         try {
-            $router = self::getRouter();
-            switch ($router->getMode()) {
-                case self::MODE_WEB:
-                    return Web::run($router->getOut());
-                    break;
-                case self::MODE_API:
-                    return Api::run($router->getOut());
-                    break;
-                default:
-                    Response::create(null)->error503();
-                    break;
+            if (!\file_exists($this->getControllerPath())) {
+                throw new \Exception('file doesnot found');
             }
+
+            if (!\is_callable($this->router->getRoute()->getController(), $this->router->getRoute()->getMethod())) {
+                throw new \Exception('controller is not callable!');
+            }
+
+            $response = \call_user_func_array([$this->router->getRoute()->getController(), $this->router->getRoute()->getAction()], $this->router->getParams());
+            if (!($response instanceof Response)) {
+                throw new \Exception('controller methods must return instance of Response class');
+            }
+
+            switch ($this->router->getRoute()->getMode()) {
+                case self::MODE_API:
+                    return $response->json();
+                case self::MODE_WEB:
+                    return $response->html();
+            }
+
         } catch (\Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
             Response::create(null)->error503();
@@ -117,33 +75,13 @@ class Application
             Response::create(null)->error503();
             return false;
         }
-        return false;
     }
 
     /**
-     * @return Router
-     * @throws Exception
+     * @return string
      */
-    private static function getRouter()
+    private function getControllerPath(): string
     {
-        return Router::create($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
-    }
-
-    /**
-     * @param string $file
-     * @param bool   $ext
-     * @param bool   $dir
-     *
-     * @return array
-     */
-    private function getPaths(string $file, bool $ext, bool $dir): array
-    {
-        if (false === $ext) {
-            $filePath = SRC_DIR . DS . $file . \PHP_EXTENSION;
-            return [SRC_DIR . DS, $filePath];
-        }
-        $path = SRC_DIR . DS . (($dir) ? SRC_DIR . $dir : '');
-        $filePath = $path . DS . $file . '.' . $ext;
-        return [$path, $filePath];
+        return SRC_DIR . DS . str_replace('\\', '/', $this->router->getRoute()->getController()) . PHP_EXTENSION;
     }
 }
