@@ -56,7 +56,7 @@ class Request
         $this->files   = new Bag($_FILES);
         $this->server  = new ServerBag($_SERVER);
         $this->cookie  = new Bag($_COOKIE);
-        $this->headers = new Bag(getallheaders());
+        $this->headers = new Bag($this->server->getHeaders());
     }
 
     /**
