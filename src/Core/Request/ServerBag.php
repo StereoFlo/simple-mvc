@@ -16,6 +16,6 @@ class ServerBag extends Bag
      */
     public function getMethod(): string
     {
-        return \strtolower(Utils::getProperty($this->currentArray, 'REQUEST_METHOD', ''));
+        return \strtolower(Utils::getProperty($this->stack, 'REQUEST_METHOD', ''));
     }
 }

@@ -14,7 +14,7 @@ class Bag
      * $_POST|$_GET|$_FILES
      * @var array
      */
-    protected $currentArray;
+    protected $stack;
 
     /**
      * Bag constructor.
@@ -23,7 +23,7 @@ class Bag
      */
     public function __construct(array $currentArray)
     {
-        $this->currentArray = $currentArray;
+        $this->stack = $currentArray;
     }
 
     /**
@@ -34,7 +34,7 @@ class Bag
      */
     public function get($key, $default = null)
     {
-        return Utils::getProperty($this->currentArray, $key, $default);
+        return Utils::getProperty($this->stack, $key, $default);
     }
 
     /**
@@ -42,7 +42,7 @@ class Bag
      */
     public function all(): ?array
     {
-        return $this->currentArray;
+        return $this->stack;
     }
 
     /**
@@ -52,7 +52,7 @@ class Bag
      */
     public function has($key): bool
     {
-        return isset($this->currentArray[$key]);
+        return isset($this->stack[$key]);
     }
 
     /**
@@ -63,7 +63,7 @@ class Bag
      */
     public function getInt($key, $default = 0)
     {
-        return Utils::getProperty($this->currentArray, $key, $default);
+        return Utils::getProperty($this->stack, $key, $default);
     }
 
     /**
@@ -74,6 +74,6 @@ class Bag
      */
     public function getBool($key, $default = false)
     {
-        return Utils::getProperty($this->currentArray, $key, $default);
+        return Utils::getProperty($this->stack, $key, $default);
     }
 }

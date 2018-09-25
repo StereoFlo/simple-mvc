@@ -34,6 +34,11 @@ class Request
     protected $cookie;
 
     /**
+     * @var Bag
+     */
+    protected $headers;
+
+    /**
      * @return Request
      */
     public static function create(): self
@@ -51,6 +56,7 @@ class Request
         $this->files   = new Bag($_FILES);
         $this->server  = new ServerBag($_SERVER);
         $this->cookie  = new Bag($_COOKIE);
+        $this->headers = new Bag(getallheaders());
     }
 
     /**
