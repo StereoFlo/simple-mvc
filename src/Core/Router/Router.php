@@ -84,7 +84,7 @@ class Router
      */
     private function initCurrentRoute(): self
     {
-        foreach ($this->collection->getStack() as $route) {
+        foreach ($this->collection->getRoutes() as $route) {
             if (\preg_match($route->getPath(), $this->requestedData->getUri(), $matches)) {
                 $this->route = $route;
                 unset($matches[0]);

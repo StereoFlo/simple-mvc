@@ -33,7 +33,7 @@ class Application
     private function __construct()
     {
         \spl_autoload_register([$this, 'loader']);
-        return $this->go();
+        return $this->runner();
     }
 
     /**
@@ -93,7 +93,7 @@ class Application
     /**
      * @return mixed
      */
-    private function go()
+    private function runner()
     {
         try {
             $router = self::getRouter();
