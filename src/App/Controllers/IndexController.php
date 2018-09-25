@@ -6,15 +6,15 @@ use Core\Controller;
 use Core\Response\Response;
 
 /**
- * Class Index
+ * Class IndexController
  * @package Controllers
  */
-class Index extends Controller
+class IndexController extends Controller
 {
     /**
      * @throws \Exception
      */
-    public static function index()
+    public static function index(): Response
     {
         return Response::create('privet');
     }

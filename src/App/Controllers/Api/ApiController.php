@@ -6,12 +6,12 @@ use Core\Controller;
 use Core\Response\Response;
 
 /**
- * Class Index
+ * Class ApiController
  * @package Controllers
  */
-class Test extends Controller
+class ApiController extends Controller
 {
-    public static function index()
+    public static function index(): Response
     {
         return Response::create(['test' => 'json']);
     }
