@@ -13,6 +13,21 @@ use Core\Response\Response;
 class IndexController extends Controller
 {
     /**
+     * @var Request
+     */
+    private $req;
+
+    /**
+     * IndexController constructor.
+     *
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->req = $request;
+    }
+
+    /**
      * @param Request $request
      *
      * @return Response

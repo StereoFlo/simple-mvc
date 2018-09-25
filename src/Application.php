@@ -84,11 +84,13 @@ class Application
                 throw new \Exception('controller is not callable!');
             }
 
-            $params1 = $this->di();
-            $class = $this->router->getRoute()->getController();
-            $class = new $class;
+            $ref = new ReflectionClass($this->router->getRoute()->getController());
+            $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
 
-            $response = \call_user_func_array([$class, $this->router->getRoute()->getAction()], $params1);
+            $params = $this->di($this->router->getRoute()->getController(), $this->router->getRoute()->getAction());
+            $class  = $ref->newInstanceArgs($resolveConstructorParams);
+
+            $response = \call_user_func_array([$class, $this->router->getRoute()->getAction()], $params);
             if (!($response instanceof ResponseInterface)) {
                 throw new \Exception('controller methods must return instance of ResponseInterface');
             }
@@ -119,10 +121,10 @@ class Application
      * @throws ReflectionException
      * @throws Exception
      */
-    private function di(): array
+    private function di($controller, $action): array
     {
         $params1 = [];
-        $method = new ReflectionMethod($this->router->getRoute()->getController(), $this->router->getRoute()->getAction());
+        $method = new ReflectionMethod($controller, $action);
         $params = $method->getParameters();
         if (empty($params)) {
             return [];
