@@ -3,7 +3,7 @@
 namespace App\Controllers\Api;
 
 use Core\Controller;
-use Core\Response\Response;
+use Core\Response\JsonResponse;
 
 /**
  * Class ApiController
@@ -11,8 +11,11 @@ use Core\Response\Response;
  */
 class ApiController extends Controller
 {
-    public static function index(): Response
+    /**
+     * @return JsonResponse
+     */
+    public static function index(): JsonResponse
     {
-        return Response::create(['test' => 'json']);
+        return JsonResponse::create(['test' => 'json']);
     }
 }

@@ -2,6 +2,7 @@
 
 use Core\Logger;
 use Core\Response\Response;
+use Core\Response\ResponseInterface;
 use Core\Router\Router;
 
 
@@ -23,6 +24,7 @@ class Application
      * @param Router $router
      *
      * @return Application
+     * @throws Exception
      */
     public static function create(Router $router)
     {
@@ -33,6 +35,8 @@ class Application
      * Autoloader constructor.
      *
      * @param Router $router
+     *
+     * @throws Exception
      */
     private function __construct(Router $router)
     {
@@ -42,6 +46,7 @@ class Application
 
     /**
      * @return mixed
+     * @throws Exception
      */
     private function run()
     {
@@ -55,24 +60,19 @@ class Application
             }
 
             $response = \call_user_func_array([$this->router->getRoute()->getController(), $this->router->getRoute()->getAction()], $this->router->getParams());
-            if (!($response instanceof Response)) {
-                throw new \Exception('controller methods must return instance of Response class');
+            if (!($response instanceof ResponseInterface)) {
+                throw new \Exception('controller methods must return instance of ResponseInterface');
             }
 
-            switch ($this->router->getRoute()->getMode()) {
-                case self::MODE_API:
-                    return $response->json();
-                case self::MODE_WEB:
-                    return $response->html();
-            }
+            return $response->send();
 
         } catch (\Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
-            Response::create(null)->error503();
+            Response::create('service unavailable', 500);
             return false;
         } catch (\Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            Response::create(null)->error503();
+            Response::create('service unavailable', 500);
             return false;
         }
     }

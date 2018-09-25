@@ -8,85 +8,62 @@ use Core\Mime;
  * Class Response
  * @package Core
  */
-class Response
+class Response implements ResponseInterface
 {
     const DEFAULT_CHARSET = 'UTF-8';
 
     /**
-     * @var bool
+     * @var int
      */
-    protected $isHtmlResponse = true;
+    protected static $httpCode = 200;
 
     /**
      * @var string
      */
-    protected $contentType;
+    protected static $contentType;
 
     /**
      * @var string
      */
-    protected $charset;
+    protected static $charset;
 
     /**
      * @var bool
      */
-    protected $isNoCache = false;
+    protected static $isNoCache = false;
 
     /**
      * @var mixed
      */
-    protected $data;
+    protected static $data;
 
     /**
      * @param        $data
+     * @param int    $httpCode
      * @param string $contentType
      * @param string $charset
      *
-     * @return Response
+     * @return static
      */
-    public static function create($data, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET): self
+    public static function create($data, $httpCode = 200, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
     {
-        return new self($data, $contentType, $charset);
+        return new static($data, $httpCode, $contentType, $charset);
     }
 
     /**
      * Response constructor.
      *
      * @param        $data
+     * @param int    $httpCode
      * @param string $contentType
      * @param string $charset
      */
-    public function __construct($data, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
+    public function __construct($data, $httpCode = 200, $contentType = Mime::HTML, $charset = self::DEFAULT_CHARSET)
     {
-        $this->data        = $data;
-        $this->contentType = $contentType;
-        $this->charset     = $charset;
-    }
-
-    /**
-     * 404 error
-     */
-    public function error404(): void
-    {
-        $this->applyHeader('HTTP/1.0 404 Not Found', 404);
-    }
-
-    /**
-     * 503 error
-     */
-    public function error503(): void
-    {
-        $this->applyHeader('HTTP/1.1 503 Service Temporarily Unavailable');
-        $this->applyHeader('Status: 503 Service Temporarily Unavailable');
-        $this->applyHeader('Retry-After: 300');
-    }
-
-    /**
-     * 503 error
-     */
-    public function error400(): void
-    {
-        $this->applyHeader('HTTP/1.1 400 BAD REQUEST', 400);
+        static::$data        = $data;
+        static::$httpCode    = $httpCode;
+        static::$contentType = $contentType;
+        static::$charset     = $charset;
     }
 
     /**
@@ -94,9 +71,8 @@ class Response
      */
     public function applyContentType(): void
     {
-        $this->isHtmlResponse = $this->contentType === Mime::HTML;
-        $this->applyHeader('Content-Type: ' . $this->contentType . '; charset=' . $this->charset);
-        $this->contentType = null;
+        $this->applyHeader('Content-Type: ' . static::$contentType . '; charset=' . static::$charset);
+        static::$contentType = null;
     }
 
     /**
@@ -104,33 +80,22 @@ class Response
      */
     public function applyNoCache($noCache = false)
     {
-        if ($noCache || $this->isNoCache) {
+        if ($noCache || static::$isNoCache) {
             $this->applyHeader('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
             $this->applyHeader('Pragma: no-cache');
-            $this->isNoCache = null;
+            static::$isNoCache = null;
         }
     }
 
     /**
+     * sends the data
      * @return void
      */
-    public function html(): void
+    public function send(): void
     {
         $this->applyContentType();
         $this->applyNoCache(true);
-        print $this->data;
-        return;
-    }
-
-    /**
-     * @return void
-     */
-    public function json(): void
-    {
-        $this->contentType = Mime::JSON;
-        $this->applyContentType();
-        $this->applyNoCache(true);
-        print \json_encode($this->data);
+        print static::$data;
         return;
     }
 
@@ -138,17 +103,16 @@ class Response
      * Применяет http заголовок
      *
      * @param string $header
-     * @param int    $code
      * @param bool   $replace
      *
      * @return bool
      */
-    protected function applyHeader(string $header, int $code = null, bool $replace = true): bool
+    protected function applyHeader(string $header, bool $replace = true): bool
     {
         if (\headers_sent()) {
             return false;
         }
-        \header($header, $replace, $code);
+        \header($header, $replace, static::$httpCode);
         return true;
     }
 }
