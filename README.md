@@ -1,3 +1,3 @@
-# simple-mvc
+# Simple MVC
 
-Very simple PHP7 MVC framework
+Простой PHP фреймворк c автоматическим резолвом зависимостей в контроллерах
