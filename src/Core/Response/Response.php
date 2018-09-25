@@ -1,6 +1,8 @@
 <?php
 
-namespace Core;
+namespace Core\Response;
+
+use Core\Mime;
 
 /**
  * Class Response

@@ -1,7 +1,7 @@
 <?php
 
 use Core\Logger;
-use Core\Response;
+use Core\Response\Response;
 use Core\Router\Router;
 
 

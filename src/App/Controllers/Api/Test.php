@@ -1,9 +1,9 @@
 <?php
 
-namespace Controllers\Api;
+namespace App\Controllers\Api;
 
 use Core\Controller;
-use Core\Response;
+use Core\Response\Response;
 
 /**
  * Class Index

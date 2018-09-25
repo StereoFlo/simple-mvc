@@ -1,9 +1,9 @@
 <?php
 
-namespace Controllers;
+namespace App\Controllers;
 
 use Core\Controller;
-use Core\Response;
+use Core\Response\Response;
 
 /**
  * Class Index
