@@ -85,8 +85,10 @@ class Application
             }
 
             $params1 = $this->di();
+            $class = $this->router->getRoute()->getController();
+            $class = new $class;
 
-            $response = \call_user_func_array([$this->router->getRoute()->getController(), $this->router->getRoute()->getAction()], $params1);
+            $response = \call_user_func_array([$class, $this->router->getRoute()->getAction()], $params1);
             if (!($response instanceof ResponseInterface)) {
                 throw new \Exception('controller methods must return instance of ResponseInterface');
             }

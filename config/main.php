@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'viewPath'     => SRC_DIR . DS . 'Views',
+    'viewPath'     => APP_DIR . DS . 'Views',
 
     /**
      *  Logger config

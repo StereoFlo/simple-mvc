@@ -16,11 +16,12 @@ class IndexController extends Controller
      * @param Request $request
      *
      * @return Response
+     * @throws \Exception
      */
     public static function index(Request $request): Response
     {
         $test = $request->query()->get('test', 'null');
-        return Response::create($test);
+        return Response::create(self::view('index', ['test' => $test]));
     }
 
     /**
