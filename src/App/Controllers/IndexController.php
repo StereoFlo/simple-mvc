@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use Core\Controller;
+use Core\Template;
 use Core\Request\Request;
 use Core\Response\Response;
 
@@ -10,7 +10,7 @@ use Core\Response\Response;
  * Class IndexController
  * @package Controllers
  */
-class IndexController extends Controller
+class IndexController
 {
     /**
      * @var Request
@@ -28,15 +28,16 @@ class IndexController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param Request  $request
+     * @param Template $template
      *
      * @return Response
      * @throws \Exception
      */
-    public static function index(Request $request): Response
+    public function index(Request $request, Template $template): Response
     {
         $test = $request->query()->get('test', 'null');
-        return Response::create(self::view('index', ['test' => $test]));
+        return Response::create($template->render('index', ['test' => $test]));
     }
 
     /**
@@ -44,7 +45,7 @@ class IndexController extends Controller
      * @param string $test2
      * @param string $test3
      */
-    public static function test(string $test1, string $test2, string $test3)
+    public function test(string $test1, string $test2, string $test3)
     {
         var_dump(func_get_args());
     }

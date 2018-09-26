@@ -8,7 +8,7 @@ use App\Utils;
  * Class Controller
  * @package Core
  */
-abstract class Controller
+class Template
 {
     /**
      * Hash for loaded views
@@ -23,7 +23,7 @@ abstract class Controller
      * @return mixed
      * @throws \Exception
      */
-    final public static function view(string $viewName, array $params = [])
+    public function render(string $viewName, array $params = [])
     {
         $mainConfig = Config::getConfig('main');
         $filePath = \realpath(Utils::getProperty($mainConfig, 'viewPath') . DS . $viewName . \PHP_EXTENSION);
