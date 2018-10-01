@@ -16,8 +16,8 @@ return [
      */
     'database'     => [
         'host'     => 'localhost',
-        'user'     => 'dir',
-        'password' => 'dir',
-        'basename' => 'dir',
+        'user'     => 'simple',
+        'password' => 'simple',
+        'basename' => 'simple',
     ],
 ];

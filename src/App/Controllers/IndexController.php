@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\TestModel;
 use Core\Template;
 use Core\Request\Request;
 use Core\Response\Response;
@@ -34,8 +35,9 @@ class IndexController
      * @return Response
      * @throws \Exception
      */
-    public function index(Request $request, Template $template): Response
+    public function index(Request $request, Template $template, TestModel $testModel): Response
     {
+        $res = $testModel->getMedia();
         $test = $request->query()->get('test', 'null');
         return Response::create($template->render('index', ['test' => $test]));
     }

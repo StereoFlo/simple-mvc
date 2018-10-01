@@ -17,9 +17,11 @@ class TestModel extends Model
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getMedia(): array
     {
-        return [];
+        $test = $this->where('id', 1)->get('test');
+        return $test;
     }
 }

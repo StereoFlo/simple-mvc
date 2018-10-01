@@ -82,7 +82,7 @@ class Model extends \mysqli
     /**
      * @var string
      */
-    protected $db_prefix;
+    protected $dbPrefix;
 
     /**
      * @var \mysqli_stmt
@@ -92,7 +92,7 @@ class Model extends \mysqli
     /**
      * @var
      */
-    protected $db_result;
+    protected $dbResult;
 
     /**
      * Db results output can be set to an array or object
@@ -133,8 +133,8 @@ class Model extends \mysqli
         $dbPassword      = Utils::getProperty($config, 'password');
         $dbName          = Utils::getProperty($config, 'basename');
         $port            = Utils::getProperty($config, 'port', ini_get('mysqli.default_port'));
-        $this->db_prefix = Utils::getProperty($config, 'prefix', '');
-        parent::__construct($host, $dbUser, $dbPassword, $dbName, $port, $this->db_prefix);
+        $this->dbPrefix = Utils::getProperty($config, 'prefix', '');
+        parent::__construct($host, $dbUser, $dbPassword, $dbName, $port, $this->dbPrefix);
         if ($this->connect_errno) {
             throw new \Exception(("Failed to connect to MySQL: (" . $this->connect_errno . ") " . $this->connect_error));
         }
@@ -187,7 +187,7 @@ class Model extends \mysqli
             \call_user_func_array([$this->stmt, 'bind_param'], $this->refValues($params));
         }
         $this->processQuery();
-        return $this->db_result;
+        return $this->dbResult;
     }
 
     /**
@@ -203,7 +203,7 @@ class Model extends \mysqli
         $this->query = \filter_var($query, FILTER_SANITIZE_STRING);
         $this->query = \html_entity_decode($this->query);
         $this->processQuery();
-        return $this->db_result;
+        return $this->dbResult;
     }
 
     /**
@@ -219,9 +219,9 @@ class Model extends \mysqli
     {
         $columns = \is_array($columns) ? $columns : $this->multiExplode($columns, ',');
         $columns = \implode(', ', $columns);
-        $this->query = 'SELECT ' . $columns . ' FROM ' . $this->db_prefix . $tableName;
+        $this->query = 'SELECT ' . $columns . ' FROM ' . $this->dbPrefix . $tableName;
         $this->processQuery();
-        return $this->db_result;
+        return $this->dbResult;
     }
 
     /**
@@ -236,13 +236,13 @@ class Model extends \mysqli
     public function getOne(string $tableName, $columns = '*')
     {
         $column = \is_array($columns) ? \implode(', ', $columns) : $columns;
-        $this->query = 'SELECT ' . $column . ' FROM ' . $this->db_prefix . $tableName;
+        $this->query = 'SELECT ' . $column . ' FROM ' . $this->dbPrefix . $tableName;
         $this->limit(1);
         $this->processQuery();
-        if (!is_array($this->db_result) || empty($this->db_result)) {
+        if (!is_array($this->dbResult) || empty($this->dbResult)) {
             return [];
         }
-        foreach ($this->db_result as $result) {
+        foreach ($this->dbResult as $result) {
             return $result;
         }
         return [];
@@ -262,14 +262,14 @@ class Model extends \mysqli
         $column = \is_array($column) ? \array_shift($column) : $column;
         $this->get($tableName, $column);
         $new_array = [];
-        if (\is_array($this->db_result) && !empty($this->db_result)) {
+        if (\is_array($this->dbResult) && !empty($this->dbResult)) {
             // Extract the column values
-            foreach ($this->db_result as $result) {
+            foreach ($this->dbResult as $result) {
                 $new_array[] = $result->{$column};
             }
         }
-        $this->db_result = $new_array;
-        return $this->db_result;
+        $this->dbResult = $new_array;
+        return $this->dbResult;
     }
 
     /**
@@ -284,14 +284,14 @@ class Model extends \mysqli
     public function getVar(string $tableName, $columns = '*')
     {
         $column = \is_array($columns) ? \implode(', ', $columns) : $columns;
-        $this->query = 'SELECT ' . $column . ' FROM ' . $this->db_prefix . $tableName;
+        $this->query = 'SELECT ' . $column . ' FROM ' . $this->dbPrefix . $tableName;
         $this->limit(1);
         $this->output('array');
         $this->processQuery();
-        if (\is_array($this->db_result) && !empty($this->db_result)) {
-            $this->db_result = $this->db_result[0][$column];
+        if (\is_array($this->dbResult) && !empty($this->dbResult)) {
+            $this->dbResult = $this->dbResult[0][$column];
         }
-        return $this->db_result;
+        return $this->dbResult;
     }
 
     /**
@@ -304,9 +304,9 @@ class Model extends \mysqli
      */
     public function insert(string $tableName, array $tableData = [])
     {
-        $this->query = 'INSERT INTO ' . $this->db_prefix . $tableName;
+        $this->query = 'INSERT INTO ' . $this->dbPrefix . $tableName;
         $this->processQuery($tableData);
-        return $this->db_result;
+        return $this->dbResult;
     }
 
     /**
@@ -320,9 +320,9 @@ class Model extends \mysqli
      */
     public function update(string $tableName, $tableData)
     {
-        $this->query = 'UPDATE ' . $this->db_prefix . $tableName . ' SET ';
+        $this->query = 'UPDATE ' . $this->dbPrefix . $tableName . ' SET ';
         $this->processQuery($tableData);
-        return $this->db_result;
+        return $this->dbResult;
     }
 
     /**
@@ -335,9 +335,9 @@ class Model extends \mysqli
      */
     public function delete(string $tableName)
     {
-        $this->query = 'DELETE FROM ' . $this->db_prefix . $tableName;
+        $this->query = 'DELETE FROM ' . $this->dbPrefix . $tableName;
         $this->processQuery();
-        return $this->db_result;
+        return $this->dbResult;
 
     }
 
@@ -408,7 +408,7 @@ class Model extends \mysqli
         if ($joinType && !\in_array($joinType, $allowedTypes))
             throw new \Exception('Wrong JOIN type: ' . $joinType);
 
-        $this->join[$joinType . " JOIN " . $this->db_prefix . $joinTable] = $joinCondition;
+        $this->join[$joinType . " JOIN " . $this->dbPrefix . $joinTable] = $joinCondition;
 
         return $this;
     }
@@ -626,7 +626,7 @@ class Model extends \mysqli
     protected function dynamicBindResults()
     {
         $parameters = [];
-        $this->db_result = [];
+        $this->dbResult = [];
 
         $meta = $this->stmt->result_metadata();
         // if $meta is false yet sqlstate is true, there's no sql error but the query is
@@ -634,16 +634,16 @@ class Model extends \mysqli
         if (!$meta && $this->stmt->sqlstate) {
             if (false !== \strpos($this->query, 'SELECT')) {
                 //it was a select statement that produced no results, so we return an empty result set
-                $this->db_result = [];
+                $this->dbResult = [];
             } elseif (false !== \strpos($this->query, 'UPDATE')) {
                 //return the number of affected rows if any, otherwise return true/false for success
-                $this->db_result = ($this->stmt->affected_rows > 0) ? $this->stmt->affected_rows : $this->db_result;
+                $this->dbResult = ($this->stmt->affected_rows > 0) ? $this->stmt->affected_rows : $this->dbResult;
             } elseif (false !== \strpos($this->query, 'INSERT')) {
                 //return the insert_id if available, otherwise return true/false for success
-                $this->db_result = ($this->stmt->insert_id > 0) ? $this->stmt->insert_id : $this->db_result;
+                $this->dbResult = ($this->stmt->insert_id > 0) ? $this->stmt->insert_id : $this->dbResult;
             } else {
                 //there were no errors so we return true
-                $this->db_result = true;
+                $this->dbResult = true;
             }
             return $this;
         }
@@ -663,14 +663,14 @@ class Model extends \mysqli
                 foreach ($row as $key => $val) {
                     $x[$key] = $val;
                 }
-                \array_push($this->db_result, $x);
+                \array_push($this->dbResult, $x);
             } else {
                 //returns an array of records as objects
                 $x = new \stdClass();
                 foreach ($row as $key => $val) {
                     $x->{$key} = $val;
                 }
-                \array_push($this->db_result, $x);
+                \array_push($this->dbResult, $x);
             }
 
         }
@@ -707,11 +707,13 @@ class Model extends \mysqli
      */
     public function beginTransaction()
     {
-        if ($ret = $this->autocommit(false)) {
+        $ret = $this->autocommit(false);
+        if ($ret) {
             $this->inTransaction = true;
-        } else {
-            $this->inTransaction = false;
+            return $ret;
         }
+
+        $this->inTransaction = false;
         return $ret;
     }
 
@@ -780,21 +782,21 @@ class Model extends \mysqli
     }
 
     /**
-     * @param       $string
-     * @param array $deliminators
+     * @param string $columns
+     * @param array  $deliminators
      *
      * @return array
      */
-    public function multiExplode($string, $deliminators = [])
+    public function multiExplode(string $columns, $deliminators = []): array
     {
         if (empty($deliminators)) {
-            $deliminators = array(",", ".", "|", ":", "_");
+            $deliminators = [",", ".", "|", ":", "_"];
         }
 
         //replace all deliminators with a single one
-        $string = \str_replace($deliminators, $deliminators[0], $string);
-        $array = \explode($deliminators[0], $string);
-        $clean = array();
+        $columns = \str_replace($deliminators, $deliminators[0], $columns);
+        $array = \explode($deliminators[0], $columns);
+        $clean = [];
         foreach ($array as $r) {
             $clean[] = \trim($r);
         }
@@ -887,7 +889,7 @@ class Model extends \mysqli
      * @param $hasTableData
      * @return self
      */
-    protected function makeWhere($tableData, $hasTableData): self
+    protected function makeWhere(array $tableData, bool $hasTableData): self
     {
         if (empty($this->where)) {
             return $this;
@@ -939,7 +941,7 @@ class Model extends \mysqli
             $this->query .= ($column . $comparison . ' AND ');
         }
         $this->query = \rtrim($this->query, ' AND ');
-        return  $this;
+        return $this;
     }
 
     /**
@@ -981,7 +983,7 @@ class Model extends \mysqli
     protected function throwError()
     {
         $this->setLastError($this->sqlstate . ' ' . $this->error);
-        $this->db_result = false;
+        $this->dbResult = false;
         throw new \Exception("Problem preparing query ($this->query) " . $this->sqlstate . ' ' . $this->error . ' ' . print_r($this->stmt->error_list, true));
     }
 
