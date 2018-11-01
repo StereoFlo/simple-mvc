@@ -14,14 +14,14 @@ class Select extends AbstractPart
     const REPLACE_TEMPLATE = '$3(`$4`)';
 
     /**
-     * @var string
+     * @var string|null
      */
     private $table;
 
     /**
      * @var string
      */
-    protected $tableAlias;
+    protected $tableAlias = null;
 
     /**
      * @var string
@@ -35,11 +35,32 @@ class Select extends AbstractPart
      *
      * @throws \Exception
      */
-    public function __construct(string $table)
+    public function __construct(?string $table)
     {
         $this->data       = [];
         $this->table      = $table;
         $this->tableAlias = $this->getTableAlias();
+    }
+
+    /**
+     * @param string $table
+     *
+     * @return Select
+     * @throws \Exception
+     */
+    public function setTable(string $table): Select
+    {
+        $this->table = $table;
+        $this->tableAlias = $this->getTableAlias();
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTable(): ?string
+    {
+        return $this->table;
     }
 
     /**
@@ -96,14 +117,14 @@ class Select extends AbstractPart
      */
     protected function getTableAlias(): string
     {
-        if (isset($this->tableAlias)) {
+        if (empty($this->tableAlias)) {
+            $tmp = \str_split($this->table);
+            if (empty($tmp)) {
+                throw new \Exception('something is wrong');
+            }
+            $this->tableAlias = $tmp[0];
             return $this->tableAlias;
         }
-        $tmp = \str_split($this->table);
-        if (empty($tmp)) {
-            throw new \Exception('something is wrong');
-        }
-        $this->tableAlias = $tmp[0];
         return $this->tableAlias;
     }
 

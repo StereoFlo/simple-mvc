@@ -82,6 +82,9 @@ class QueryBuilder
     public function addSelect(array $columns = []): QueryBuilder
     {
         $this->checkTableSet();
+        if (empty($this->select->getTable())) {
+            $this->select->setTable($this->table);
+        }
         $this->select->addSelect($columns);
         return $this;
     }
