@@ -1,13 +1,13 @@
 <?php
 
-namespace Core\Model;
+namespace Core\Database;
 
 
-use Core\Model\QueryBuilder\GroupBy;
-use Core\Model\QueryBuilder\Limit;
-use Core\Model\QueryBuilder\OrderBy;
-use Core\Model\QueryBuilder\Select;
-use Core\Model\QueryBuilder\Where;
+use Core\Database\QueryBuilder\GroupBy;
+use Core\Database\QueryBuilder\Limit;
+use Core\Database\QueryBuilder\OrderBy;
+use Core\Database\QueryBuilder\Select;
+use Core\Database\QueryBuilder\Where;
 
 /**
  * Class QueryBuilder

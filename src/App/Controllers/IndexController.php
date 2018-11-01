@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\TestModel;
+use Core\Database\DB;
 use Core\Template;
 use Core\Request\Request;
 use Core\Response\Response;
@@ -31,13 +31,15 @@ class IndexController
     /**
      * @param Request  $request
      * @param Template $template
+     * @param DB       $db
      *
      * @return Response
      * @throws \Exception
      */
-    public function index(Request $request, Template $template, TestModel $testModel): Response
+    public function index(Request $request, Template $template, DB $db): Response
     {
-        $res = $testModel->getMedia();
+        $query = $db->getQueryBuilder('test')->addSelect()->getQuery();
+        $data = $db->getConnection()->fetchAssocArray($query);
         $test = $request->query()->get('test', 'null');
         return Response::create($template->render('index', ['test' => $test]));
     }

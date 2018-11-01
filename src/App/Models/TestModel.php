@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Core\Model;
+use Core\Database;
 
 class TestModel extends Model
 {

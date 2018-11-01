@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Core\Model\QueryBuilder;
+namespace Core\Database\QueryBuilder;
 
 /**
  * Class Where

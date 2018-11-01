@@ -1,10 +1,16 @@
 <?php
 
-namespace Core\Model\Connection;
+namespace Core\Database\Connection;
 
-
+/**
+ * Class AbstractConnection
+ * @package Core\Database\Connection
+ */
 abstract class AbstractConnection implements ConnectionInterface
 {
+    const MYSQLI = 'mysqli';
+    const PDO    = 'pdo';
+
     /**
      * @var string
      */
@@ -36,7 +42,7 @@ abstract class AbstractConnection implements ConnectionInterface
     protected static $prefix;
 
     /**
-     * @var
+     * @var \PDO|\mysqli
      */
     protected static $connection;
 
@@ -58,5 +64,7 @@ abstract class AbstractConnection implements ConnectionInterface
         static::$dbName = $dbName;
         static::$port = $port;
         static::$prefix = $prefix;
+
+        static::initConnection();
     }
 }
