@@ -48,27 +48,37 @@ class QueryBuilder
     /**
      * QueryBuilder constructor.
      *
-     * @param string $table
-     *
      * @throws \Exception
      */
-    public function __construct(string $table)
+    public function __construct()
     {
-        $this->table      = $table;
-        $this->select     = new Select($this->table);
-        $this->where      = new Where();
-        $this->groupBy    = new GroupBy();
-        $this->orderBy    = new OrderBy();
-        $this->limit      = new Limit();
+        $this->select  = new Select($this->table);
+        $this->where   = new Where();
+        $this->groupBy = new GroupBy();
+        $this->orderBy = new OrderBy();
+        $this->limit   = new Limit();
+    }
+
+    /**
+     * @param string $table
+     *
+     * @return QueryBuilder
+     */
+    public function setTable(string $table): QueryBuilder
+    {
+        $this->table = $table;
+        return $this;
     }
 
     /**
      * @param array $columns
      *
      * @return QueryBuilder
+     * @throws \Exception
      */
     public function addSelect(array $columns = []): QueryBuilder
     {
+        $this->checkTableSet();
         $this->select->addSelect($columns);
         return $this;
     }
@@ -80,9 +90,11 @@ class QueryBuilder
      * @param string $expr
      *
      * @return QueryBuilder
+     * @throws \Exception
      */
     public function addWhere(string $key, string $value, string $op = Where::OPERATOR_AND, string $expr = '='): self
     {
+        $this->checkTableSet();
         $this->where->addWhere($key, $value, $op, $expr);
         return $this;
     }
@@ -91,9 +103,11 @@ class QueryBuilder
      * @param array $columns
      *
      * @return $this
+     * @throws \Exception
      */
     public function addGroupBy(array $columns): self
     {
+        $this->checkTableSet();
         $this->groupBy->addGroupBy($columns);
         return $this;
     }
@@ -103,9 +117,11 @@ class QueryBuilder
      * @param string|null $direction
      *
      * @return QueryBuilder
+     * @throws \Exception
      */
     public function addOrderBy(string $column, string $direction = null): self
     {
+        $this->checkTableSet();
         $this->orderBy->addOrderBy($column, $direction);
         return $this;
     }
@@ -114,9 +130,11 @@ class QueryBuilder
      * @param int $limit
      *
      * @return QueryBuilder
+     * @throws \Exception
      */
     public function addLimit(int $limit): self
     {
+        $this->checkTableSet();
         $this->limit->addLimit($limit);
         return $this;
     }
@@ -135,5 +153,16 @@ class QueryBuilder
     public function __toString(): string
     {
         return $this->getQuery();
+    }
+
+    /**
+     * checkTableSet
+     * @throws \Exception
+     */
+    protected function checkTableSet(): void
+    {
+        if (empty($this->table)) {
+            throw new \Exception('table must be set');
+        }
     }
 }
