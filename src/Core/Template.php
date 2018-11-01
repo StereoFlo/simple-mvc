@@ -34,7 +34,7 @@ class Template
             $$var = $val;
         }
         if (empty(self::$loadedViews[\md5($filePath)])) {
-            self::$loadedViews[\md5($filePath)] = include_once $filePath;
+            self::$loadedViews[\md5($filePath)] = require_once $filePath;
             return self::$loadedViews[\md5($filePath)];
         }
         return self::$loadedViews[\md5($filePath)];

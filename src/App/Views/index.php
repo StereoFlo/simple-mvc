@@ -1,3 +1,3 @@
-test
-
-<?php if (isset($test)) { print $test; } ?>
+Request <?php var_dump($test) ?>
+<br>
+Database <?php var_dump($data) ?>

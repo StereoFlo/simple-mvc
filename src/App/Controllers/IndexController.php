@@ -41,7 +41,7 @@ class IndexController
         $query = $db->getQueryBuilder('test')->addSelect()->getQuery();
         $data = $db->getConnection()->fetchAssocArray($query);
         $test = $request->query()->get('test', 'null');
-        return Response::create($template->render('index', ['test' => $test]));
+        return Response::create($template->render('index', ['test' => $test, 'data' => $data]));
     }
 
     /**

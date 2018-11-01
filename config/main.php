@@ -15,7 +15,7 @@ return [
      * Database config
      */
     'database' => [
-        'type'     => 'mysqli',
+        'type'     => 'pdo',
         'host'     => 'localhost',
         'user'     => 'simple',
         'password' => 'simple',
