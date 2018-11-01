@@ -48,10 +48,13 @@ class QueryBuilder
     /**
      * QueryBuilder constructor.
      *
+     * @param string|null $table
+     *
      * @throws \Exception
      */
-    public function __construct()
+    public function __construct(string $table = null)
     {
+        $this->table   = $table;
         $this->select  = new Select($this->table);
         $this->where   = new Where();
         $this->groupBy = new GroupBy();
