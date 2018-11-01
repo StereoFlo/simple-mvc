@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'viewPath'     => APP_DIR . DS . 'Views',
+    'viewPath' => APP_DIR . DS . 'Views',
 
     /**
      *  Logger config
      */
-    'logger'       => [
+    'logger'   => [
         'path'   => '../tmp/log',
         'prefix' => 'appLog' . date('Y-m-d'),
     ],
@@ -14,10 +14,11 @@ return [
     /**
      * Database config
      */
-    'database'     => [
+    'database' => [
+        'type'     => 'mysqli',
         'host'     => 'localhost',
-        'user'     => 'dir',
-        'password' => 'dir',
-        'basename' => 'dir',
+        'user'     => 'simple',
+        'password' => 'simple',
+        'dbname'   => 'simple',
     ],
 ];
