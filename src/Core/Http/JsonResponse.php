@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Core\Response;
+namespace Core\Http;
 
 use Core\Mime;
 

@@ -2,8 +2,8 @@
 
 namespace App\Controllers\Api;
 
-use Core\Request\Request;
-use Core\Response\JsonResponse;
+use Core\Http\Request;
+use Core\Http\JsonResponse;
 
 /**
  * Class ApiController

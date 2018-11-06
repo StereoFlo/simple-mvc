@@ -2,9 +2,9 @@
 
 use Core\Container;
 use Core\Logger;
-use Core\Request\Request;
-use Core\Response\Response;
-use Core\Response\ResponseInterface;
+use Core\Http\Request;
+use Core\Http\Response;
+use Core\Http\ResponseInterface;
 use Core\Router\Router;
 
 

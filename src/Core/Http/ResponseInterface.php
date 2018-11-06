@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Response;
+namespace Core\Http;
 
 /**
  * Interface ResponseInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Request;
+namespace Core\Http;
 
 use App\Utils;
 

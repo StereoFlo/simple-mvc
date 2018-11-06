@@ -4,8 +4,8 @@ namespace App\Controllers;
 
 use Core\Database\DB;
 use Core\Template;
-use Core\Request\Request;
-use Core\Response\Response;
+use Core\Http\Request;
+use Core\Http\Response;
 
 /**
  * Class IndexController

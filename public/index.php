@@ -1,7 +1,7 @@
 <?php
 
 use Core\Container;
-use Core\Request\Request;
+use Core\Http\Request;
 use Core\Router\Router;
 
 include_once '../src/bootstrap.php';

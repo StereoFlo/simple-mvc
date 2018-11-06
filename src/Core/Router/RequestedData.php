@@ -3,8 +3,8 @@
 
 namespace Core\Router;
 
-use Core\Request\Bag;
-use Core\Request\Request;
+use Core\Http\Bag;
+use Core\Http\Request;
 
 /**
  * Class RequestedData

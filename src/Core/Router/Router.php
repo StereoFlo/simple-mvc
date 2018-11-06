@@ -2,8 +2,8 @@
 
 namespace Core\Router;
 
-use Core\Request\Request;
-use Core\Request\Bag;
+use Core\Http\Request;
+use Core\Http\Bag;
 use Core\Router\Collection\Route;
 
 /**
