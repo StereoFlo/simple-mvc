@@ -38,6 +38,19 @@ class Bag
     }
 
     /**
+     * @param string $key
+     * @param        $value
+     *
+     * @return Bag
+     */
+    public function set(string $key, $value): self
+    {
+        $this->stack[$key] = $value;
+
+        return $this;
+    }
+
+    /**
      * @return array|null
      */
     public function all(): ?array

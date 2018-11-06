@@ -67,24 +67,28 @@ class Response implements ResponseInterface
     }
 
     /**
-     * applyContentType
+     * @param Request $request
+     *
+     * @return $this
      */
-    public function applyContentType(): void
+    public function prepare(Request $request)
     {
-        $this->applyHeader('Content-Type: ' . static::$contentType . '; charset=' . static::$charset);
-        static::$contentType = null;
-    }
-
-    /**
-     * @param bool $noCache
-     */
-    public function applyNoCache($noCache = false)
-    {
-        if ($noCache || static::$isNoCache) {
-            $this->applyHeader('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-            $this->applyHeader('Pragma: no-cache');
-            static::$isNoCache = null;
+        if (\headers_sent()) {
+            return $this;
         }
+        if (!$request->getHeaders()->has('Content-Type')) {
+            $request->getHeaders()->set('Content-Type', static::$contentType . '; charset=' . static::$charset);
+        }
+
+        if (static::$isNoCache && !$request->getHeaders()->has('Cache-Control')) {
+            $request->getHeaders()->set('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+            $request->getHeaders()->set('Pragma', 'no-cache');
+        }
+
+        foreach ($request->getHeaders() as $name => $value) {
+            header($name.': '.$value, false, static::$httpCode);
+        }
+        return $this;
     }
 
     /**
@@ -93,26 +97,9 @@ class Response implements ResponseInterface
      */
     public function send(): void
     {
-        $this->applyContentType();
-        $this->applyNoCache(true);
+        static::$isNoCache = true;
+        $this->prepare(new Request());
         print static::$data;
         return;
-    }
-
-    /**
-     * Применяет http заголовок
-     *
-     * @param string $header
-     * @param bool   $replace
-     *
-     * @return bool
-     */
-    protected function applyHeader(string $header, bool $replace = true): bool
-    {
-        if (\headers_sent()) {
-            return false;
-        }
-        \header($header, $replace, static::$httpCode);
-        return true;
     }
 }

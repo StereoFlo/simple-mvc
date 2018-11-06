@@ -98,4 +98,12 @@ class Request
     {
         return $this->cookie;
     }
+
+    /**
+     * @return Bag
+     */
+    public function getHeaders(): Bag
+    {
+        return $this->headers;
+    }
 }
