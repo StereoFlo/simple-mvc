@@ -77,16 +77,16 @@ class Response implements ResponseInterface
         if (\headers_sent()) {
             return $this;
         }
-        if (!$request->getHeaders()->has('Content-Type')) {
-            $request->getHeaders()->set('Content-Type', static::$contentType . '; charset=' . static::$charset);
+        if (!$request->headers()->has('Content-Type')) {
+            $request->headers()->set('Content-Type', static::$contentType . '; charset=' . static::$charset);
         }
 
-        if (static::$isNoCache && !$request->getHeaders()->has('Cache-Control')) {
-            $request->getHeaders()->set('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-            $request->getHeaders()->set('Pragma', 'no-cache');
+        if (static::$isNoCache && !$request->headers()->has('Cache-Control')) {
+            $request->headers()->set('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+            $request->headers()->set('Pragma', 'no-cache');
         }
 
-        foreach ($request->getHeaders() as $name => $value) {
+        foreach ($request->headers() as $name => $value) {
             header($name.': '.$value, false, static::$httpCode);
         }
         return $this;

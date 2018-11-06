@@ -94,7 +94,7 @@ class Request
     /**
      * @return Bag
      */
-    public function getCookie(): Bag
+    public function cookie(): Bag
     {
         return $this->cookie;
     }
@@ -102,7 +102,7 @@ class Request
     /**
      * @return Bag
      */
-    public function getHeaders(): Bag
+    public function headers(): Bag
     {
         return $this->headers;
     }
