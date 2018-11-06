@@ -64,6 +64,7 @@ class Response implements ResponseInterface
         static::$httpCode    = $httpCode;
         static::$contentType = $contentType;
         static::$charset     = $charset;
+        $this->send();
     }
 
     /**

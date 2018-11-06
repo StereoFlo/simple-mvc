@@ -68,7 +68,7 @@ class Application
     {
         try {
             if (empty($this->router->getRoute())) {
-                Response::create('404 not found', 404)->send();
+                Response::create('404 not found', 404);
                 return false;
             }
 
@@ -98,15 +98,15 @@ class Application
                 throw new \Exception('controller methods must return instance of ResponseInterface');
             }
 
-            return $response->send();
+            return $response;
 
         } catch (\Exception $e) {
             Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
-            Response::create('service unavailable', 500)->send();
+            Response::create('service unavailable', 500);
             return false;
         } catch (\Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            Response::create('service unavailable', 500)->send();
+            Response::create('service unavailable', 500);
             return false;
         }
     }
