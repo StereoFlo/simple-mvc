@@ -3,7 +3,7 @@
 
 namespace Core\Http;
 
-use App\Utils;
+use Core\Utils;
 
 /**
  * Class ServerBag

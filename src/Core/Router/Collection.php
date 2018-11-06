@@ -2,7 +2,7 @@
 
 namespace Core\Router;
 
-use App\Utils;
+use Core\Utils;
 use Core\Config;
 use Core\Router\Collection\Route;
 

@@ -2,7 +2,7 @@
 
 namespace Core;
 
-use App\Utils;
+use Core\Utils;
 
 /**
  * Class Controller

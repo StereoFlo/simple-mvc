@@ -1,13 +1,18 @@
 <?php
 
-namespace Core;
+namespace Core\Session;
 
-use App\Utils;
+use Core\Utils;
+use Core\Config;
 
+/**
+ * Class Session
+ * @package Core
+ */
 class Session
 {
     /**
-     * @var string The name used for the session
+     * @var string session name
      */
     private static $SESSION_NAME = 'f7eac143c2e6c95e84a3e128e9ddcee6';
 
@@ -51,7 +56,7 @@ class Session
      */
     public static function read(string $key, bool $child = false)
     {
-        if (!is_string($key)) {
+        if (!\is_string($key)) {
             throw new \Exception('Session key must be string value');
         }
         self::init();
@@ -79,7 +84,7 @@ class Session
      */
     public static function delete(string $key): bool
     {
-        if (!is_string($key)) {
+        if (!\is_string($key)) {
             throw new \Exception('Session key must be string value');
         }
         self::init();
@@ -89,46 +94,36 @@ class Session
     }
 
     /**
-     * Echos current session data.
-     *
-     * @return void
-     */
-    public static function dump()
-    {
-        self::init();
-        echo nl2br(print_r($_SESSION));
-    }
-
-    /**
      * Starts or resumes a session by calling {@link Session::_init()}.
      *
      * @see Session::init()
      *
-     * @param bool        $regenerate_session_id
+     * @param bool        $regenerateSessionId
      * @param int         $limit
      * @param string      $path
      * @param null|string $domain
-     * @param null        $secure_cookies_only
+     * @param null        $secureOnly
      *
      * @return bool Returns true upon success and false upon failure.
+     * @throws \Exception
      */
-    public static function start(bool $regenerate_session_id = true, int $limit = 0, $path = '/', string $domain = null, $secure_cookies_only = null)
+    public static function start(bool $regenerateSessionId = true, int $limit = 0, $path = '/', string $domain = null, $secureOnly = null)
     {
-        return self::init($regenerate_session_id, $limit, $path, $domain, $secure_cookies_only);
+        return self::init($regenerateSessionId, $limit, $path, $domain, $secureOnly);
     }
 
     /**
      * @return bool
      */
-    public static function regenerate_session_id(): bool
+    public static function regenerateSessionId(): bool
     {
         $session = [];
         foreach ($_SESSION as $k => $v) {
             $session[$k] = $v;
         }
-        session_destroy();
-        session_id(bin2hex(openssl_random_pseudo_bytes(16)));
-        session_start();
+        \session_destroy();
+        \session_id(bin2hex(\openssl_random_pseudo_bytes(16)));
+        \session_start();
         foreach ($session as $k => $v) {
             $_SESSION[$k] = $v;
         }
@@ -143,8 +138,8 @@ class Session
     public static function params(): array
     {
         $currentSessionData = [];
-        if ('' !== session_id()) {
-            $currentSessionData = session_get_cookie_params();
+        if ('' !== \session_id()) {
+            $currentSessionData = \session_get_cookie_params();
         }
         if (empty($currentSessionData)) {
             return [];
@@ -159,11 +154,10 @@ class Session
      */
     public static function close(): bool
     {
-        if ('' !== session_id()) {
-            session_write_close();
+        if (empty(\session_id())) {
             return true;
         }
-
+        \session_write_close();
         return true;
     }
 
@@ -185,16 +179,16 @@ class Session
      */
     public static function destroy(): bool
     {
-        if (empty(session_id())) {
+        if (empty(\session_id())) {
             return false;
         }
 
         $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+        if (\ini_get("session.use_cookies")) {
+            $params = \session_get_cookie_params();
+            \setcookie(session_name(), '', \time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
         }
-        return session_destroy();
+        return \session_destroy();
 
     }
 
@@ -207,44 +201,42 @@ class Session
     {
         $last = $_SESSION['LAST_ACTIVE'] ?? false;
 
-        if (false !== $last && (time() - $last > self::$SESSION_AGE)) {
+        if (false !== $last && (\time() - $last > self::$SESSION_AGE)) {
             self::destroy();
             throw new \Exception('Something is wrong with a session');
         }
-        $_SESSION['LAST_ACTIVE'] = time();
+        $_SESSION['LAST_ACTIVE'] = \time();
     }
 
     /**
      * Initializes a new session or resumes an existing session.
      *
-     * @param bool        $regenerate_session_id
+     * @param bool        $regenerateSessionId
      * @param int         $limit
      * @param string      $path
      * @param null|string $domain
-     * @param bool|null   $secure_cookies_only
-     * @param string      $baseUrl
+     * @param bool|null   $secureOnly
      *
      * @return bool Returns true upon success and false upon failure.
      * @throws \Exception
      */
-    private static function init(bool $regenerate_session_id = false, int $limit = 0, string $path = '/', string $domain = null, bool $secure_cookies_only = null, string $baseUrl = ''): bool
+    private static function init(bool $regenerateSessionId = false, int $limit = 0, string $path = '/', string $domain = null, bool $secureOnly = null): bool
     {
-        if (function_exists('session_status')) {
-            if (session_status() == PHP_SESSION_DISABLED) {
+        if (\function_exists('session_status')) {
+            if (\session_status() == PHP_SESSION_DISABLED) {
                 throw new \Exception('Session is disabled');
             }
         }
-        if (empty(session_id())) {
+        if (empty(\session_id())) {
             try {
-                $site_root = $baseUrl;
-                $session_save_path = $site_root . Config::getConfig('session', 'session_dir');
-                session_save_path($session_save_path);
-                session_name(self::$SESSION_NAME);
+                $sessionSavePath = Config::getConfig('session', 'session_dir');
+                \session_save_path($sessionSavePath);
+                \session_name(self::$SESSION_NAME);
                 $domain = $domain ?? $_SERVER['SERVER_NAME'];
-                session_set_cookie_params($limit, $path, $domain, $secure_cookies_only, true);
-                session_start();
-                if ($regenerate_session_id) {
-                    self::regenerate_session_id();
+                \session_set_cookie_params($limit, $path, $domain, $secureOnly, true);
+                \session_start();
+                if ($regenerateSessionId) {
+                    self::regenerateSessionId();
                 }
                 return true;
             } catch (\Exception $exception) {
@@ -252,9 +244,9 @@ class Session
             }
         }
         self::age();
-        if ($regenerate_session_id && rand(1, 100) <= 5) {
-            self::regenerate_session_id();
-            $_SESSION['regenerated_id'] = session_id();
+        if ($regenerateSessionId && \mt_rand(1, 100) <= 5) {
+            self::regenerateSessionId();
+            $_SESSION['regenerated_id'] = \session_id();
         }
         return true;
 
