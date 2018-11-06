@@ -8,24 +8,20 @@ return [
         'method'     => 'get',
         'controller' => \App\Controllers\IndexController::class,
         'action'     => 'index',
-        'mode'       => Application::MODE_WEB,
     ],
     '/^\/test\/(.\d+)\/(.\d+)\/(.\d+)\/?$/i' => [
         'method'     => 'get',
         'controller' => \App\Controllers\IndexController::class,
         'action'     => 'test',
-        'mode'       => Application::MODE_WEB,
     ],
     '/^\/api\/test\/(.\d+)$/i'               => [
         'method'     => 'get',
         'controller' => \App\Controllers\Api\ApiController::class,
         'action'     => 'test',
-        'mode'       => Application::MODE_API,
     ],
     '/^\/api\/index$/i'                      => [
         'method'     => 'get',
         'controller' => \App\Controllers\Api\ApiController::class,
         'action'     => 'index',
-        'mode'       => Application::MODE_API,
     ],
 ];

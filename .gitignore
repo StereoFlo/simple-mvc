@@ -4,3 +4,4 @@ tmp/sessions/sess_*
 tmp/log/*.log
 *~
 .DS_Store
+/vendor/

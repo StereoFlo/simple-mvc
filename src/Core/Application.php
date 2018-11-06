@@ -1,7 +1,7 @@
 <?php
 
-use Core\Container;
-use Core\Logger;
+namespace Core;
+
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Http\ResponseInterface;
@@ -29,11 +29,6 @@ class Application
     private $container;
 
     /**
-     * Modes
-     */
-    const MODE_API = 1, MODE_WEB = 2;
-
-    /**
      * Static call
      *
      * @param Request   $request
@@ -41,7 +36,7 @@ class Application
      * @param Container $container
      *
      * @return Application
-     * @throws Exception
+     * @throws \Exception
      */
     public static function create(Request $request, Router $router, Container $container)
     {
@@ -55,7 +50,7 @@ class Application
      * @param Router    $router
      * @param Container $container
      *
-     * @throws Exception
+     * @throws \Exception
      */
     private function __construct(Request $request, Router $router, Container $container)
     {
@@ -67,7 +62,7 @@ class Application
 
     /**
      * @return mixed
-     * @throws Exception
+     * @throws \Exception
      */
     private function run()
     {
@@ -89,7 +84,7 @@ class Application
                 throw new \Exception('controller is not callable!');
             }
 
-            $ref = new ReflectionClass($this->router->getRoute()->getController());
+            $ref = new \ReflectionClass($this->router->getRoute()->getController());
             $resolveConstructorParams = [];
             if (!empty($ref->getConstructor())) {
                 $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
@@ -129,13 +124,13 @@ class Application
      * @param $action
      *
      * @return array
-     * @throws ReflectionException
-     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \Exception
      */
     private function di(string $controller, string $action): array
     {
         $result = [];
-        $method = new ReflectionMethod($controller, $action);
+        $method = new \ReflectionMethod($controller, $action);
         $params = $method->getParameters();
         if (empty($params)) {
             return [];

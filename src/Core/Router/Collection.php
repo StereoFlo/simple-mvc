@@ -67,8 +67,7 @@ class Collection
             $controller = Utils::getProperty($routeData, 'controller');
             $method     = Utils::getProperty($routeData, 'method');
             $action     = Utils::getProperty($routeData, 'action');
-            $mode       = Utils::getProperty($routeData, 'mode');
-            $this->addRoute(new Route($path, $controller, $method, $action, $mode));
+            $this->addRoute(new Route($path, $controller, $method, $action));
         }
         return $this;
     }

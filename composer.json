@@ -1,0 +1,21 @@
+{
+    "name": "stereoflo/simple-mvc",
+    "description": "Just simple mvc framework",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "StereoFlo",
+            "email": "Stereoflo@stereoflo.ru"
+        }
+    ],
+    "require": {
+        "php": "^7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/App",
+            "Core\\": "src/Core"
+        }
+    }
+}
