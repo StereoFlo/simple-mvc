@@ -1,6 +1,10 @@
 <?php
 
 use Core\Container;
+use Core\Exception\HttpNotFoundException;
+use Core\Exception\ResourceNotFoundException;
+use Core\Exception\RuntimeException;
+use Core\Exception\UnavailableMethodException;
 use Core\Logger;
 use Core\Request\Request;
 use Core\Response\Response;
@@ -61,53 +65,28 @@ class Application
     }
 
     /**
-     * @return mixed
+     * @return mixed|void
      * @throws Exception
      */
     private function run()
     {
         try {
-            if (empty($this->router->getRoute())) {
-                Response::create('404 not found', 404)->send();
-                return false;
-            }
-
-            if ($this->router->getRoute()->getMethod() !== $this->request->server()->getMethod()) {
-                throw new \Exception('this method is not allowed here');
-            }
-
-            if (!\file_exists($this->getControllerPath())) {
-                throw new \Exception('file doesnot found');
-            }
-
-            if (!\is_callable($this->router->getRoute()->getController(), $this->router->getRoute()->getAction())) {
-                throw new \Exception('controller is not callable!');
-            }
-
-            $ref = new \ReflectionClass($this->router->getRoute()->getController());
-            $resolveConstructorParams = [];
-            if (!empty($ref->getConstructor())) {
-                $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
-            }
-
-            $params = $this->di($this->router->getRoute()->getController(), $this->router->getRoute()->getAction());
-            $class  = $ref->newInstanceArgs($resolveConstructorParams);
+            $this->checkRoute();
+            $this->checkRouteMethod();
+            $this->checkControllerFile();
+            $this->checkCallable();
+            $controller = new \ReflectionClass($this->router->getRoute()->getController());
+            $params     = $this->di($this->router->getRoute()->getController(), $this->router->getRoute()->getAction());
+            $class      = $controller->newInstanceArgs($this->getMethodParams($controller));
 
             $response = \call_user_func_array([$class, $this->router->getRoute()->getAction()], $params);
             if (!($response instanceof ResponseInterface)) {
-                throw new \Exception('controller methods must return instance of ResponseInterface');
+                throw new RuntimeException('controller methods must return instance of ResponseInterface', 500);
             }
-
             return $response->send();
-
-        } catch (\Exception $e) {
-            Logger::logToFile($e->getCode() . ': ' . $e->getMessage());
-            Response::create('service unavailable', 500)->send();
-            return false;
         } catch (\Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            Response::create('service unavailable', 500)->send();
-            return false;
+            return Response::create($t->getMessage(), $t->getCode())->send();
         }
     }
 
@@ -138,15 +117,74 @@ class Application
         foreach ($params as $param) {
             if (!$param->getType()->isBuiltin()) {
                 if (!\is_callable($param->getType()->getName(), '__constructor')) {
-                    throw new \Exception('parameter is not callable!');
+                    throw new RuntimeException('parameter is not callable!', 500);
                 }
                 if (null === $this->container->get($param->getType()->getName())) {
                     $this->container->set($param->getType()->getName());
                 }
                 $result[$param->getPosition()] = $this->container->get($param->getType()->getName());
-                $result = array_merge($result, $this->router->getParams());
+                $result = \array_merge($result, $this->router->getParams());
             }
         }
         return $result;
+    }
+
+    /**
+     * checkControllerFile
+     * @throws ResourceNotFoundException
+     */
+    private function checkControllerFile(): void
+    {
+        if (!\file_exists($this->getControllerPath())) {
+            throw new ResourceNotFoundException('file doesnot found', 404);
+        }
+    }
+
+    /**
+     * checkRouteMethod
+     * @throws UnavailableMethodException
+     */
+    private function checkRouteMethod(): void
+    {
+        if ($this->router->getRoute()->getMethod() !== $this->request->server()->getMethod()) {
+            throw new UnavailableMethodException('this method is not allowed here', 500);
+        }
+    }
+
+    /**
+     * checkRoute
+     * @throws HttpNotFoundException
+     */
+    private function checkRoute(): void
+    {
+        if (empty($this->router->getRoute())) {
+            throw new HttpNotFoundException('404 not found', 404);
+        }
+    }
+
+    /**
+     * checkCallable
+     * @throws RuntimeException
+     */
+    private function checkCallable(): void
+    {
+        if (!\is_callable($this->router->getRoute()->getController(), $this->router->getRoute()->getAction())) {
+            throw new RuntimeException('controller is not callable!', 500);
+        }
+    }
+
+    /**
+     * @param \ReflectionClass $ref
+     *
+     * @return array
+     * @throws ReflectionException
+     */
+    private function getMethodParams(\ReflectionClass $ref): array
+    {
+        $resolveConstructorParams = [];
+        if (!empty($ref->getConstructor())) {
+            $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
+        }
+        return $resolveConstructorParams;
     }
 }
