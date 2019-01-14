@@ -1,13 +1,12 @@
 <?php
 
-use Core\Container;
 use Core\Request\Request;
 use Core\Router\Router;
 
 include_once '../src/bootstrap.php';
+include_once '../config/container.php';
 
-$container = new Container();
-$request   = Request::create();
-$router    = Router::create($request);
+$request = Request::create();
+$router  = Router::create($request);
 
 Application::create($request, $router, $container);

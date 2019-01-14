@@ -84,7 +84,7 @@ class Application
                 throw new \Exception('controller is not callable!');
             }
 
-            $ref = new ReflectionClass($this->router->getRoute()->getController());
+            $ref = new \ReflectionClass($this->router->getRoute()->getController());
             $resolveConstructorParams = [];
             if (!empty($ref->getConstructor())) {
                 $resolveConstructorParams = $this->di($this->router->getRoute()->getController(), $ref->getConstructor()->getName());
@@ -130,7 +130,7 @@ class Application
     private function di(string $controller, string $action): array
     {
         $result = [];
-        $method = new ReflectionMethod($controller, $action);
+        $method = new \ReflectionMethod($controller, $action);
         $params = $method->getParameters();
         if (empty($params)) {
             return [];
