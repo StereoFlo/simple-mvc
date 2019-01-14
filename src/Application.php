@@ -61,11 +61,11 @@ class Application
         $this->request   = $request;
         $this->router    = $router;
         $this->container = $container;
-        return $this->run();
+        $this->run();
     }
 
     /**
-     * @return mixed|void
+     * @return void
      * @throws Exception
      */
     private function run()
@@ -83,10 +83,12 @@ class Application
             if (!($response instanceof ResponseInterface)) {
                 throw new RuntimeException('controller methods must return instance of ResponseInterface', 500);
             }
-            return $response->send();
+            $response->send();
+            return;
         } catch (\Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
-            return Response::create($t->getMessage(), $t->getCode())->send();
+            Response::create($t->getMessage(), $t->getCode())->send();
+            return;
         }
     }
 
