@@ -29,11 +29,6 @@ class Application
     private $container;
 
     /**
-     * Modes
-     */
-    const MODE_API = 1, MODE_WEB = 2;
-
-    /**
      * Static call
      *
      * @param Request   $request

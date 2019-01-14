@@ -2,7 +2,6 @@
 
 namespace Core\Router;
 
-use App\Utils;
 use Core\Config;
 use Core\Router\Collection\Route;
 
@@ -63,12 +62,8 @@ class Collection
             $this->isEmpty = true;
             return $this;
         }
-        foreach ($routes as $path => $routeData) {
-            $controller = Utils::getProperty($routeData, 'controller');
-            $method     = Utils::getProperty($routeData, 'method');
-            $action     = Utils::getProperty($routeData, 'action');
-            $mode       = Utils::getProperty($routeData, 'mode');
-            $this->addRoute(new Route($path, $controller, $method, $action, $mode));
+        foreach ($routes as $routeData) {
+            $this->addRoute($routeData);
         }
         return $this;
     }

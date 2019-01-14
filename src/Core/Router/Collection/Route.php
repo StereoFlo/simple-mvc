@@ -27,26 +27,19 @@ class Route
     protected $action;
 
     /**
-     * @var string
-     */
-    protected $mode;
-
-    /**
      * Route constructor.
      *
      * @param string $path
      * @param string $controller
      * @param string $method
      * @param string $action
-     * @param string $mode
      */
-    public function __construct(string $path, string $controller, string $method, string $action, string $mode)
+    public function __construct(string $path, string $controller, string $method, string $action)
     {
         $this->path       = $path;
         $this->controller = $controller;
         $this->method     = $method;
         $this->action     = $action;
-        $this->mode       = $mode;
     }
 
     /**
@@ -71,14 +64,6 @@ class Route
     public function getAction(): string
     {
         return $this->action;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMode(): string
-    {
-        return $this->mode;
     }
 
     /**

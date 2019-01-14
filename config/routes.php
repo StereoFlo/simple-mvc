@@ -3,29 +3,12 @@
 /**
  * app routes
  */
+
+use Core\Router\Collection\Route;
+
 return [
-    '/^\/$/'                                 => [
-        'method'     => 'get',
-        'controller' => \App\Controllers\IndexController::class,
-        'action'     => 'index',
-        'mode'       => Application::MODE_WEB,
-    ],
-    '/^\/test\/(.\d+)\/(.\d+)\/(.\d+)\/?$/i' => [
-        'method'     => 'get',
-        'controller' => \App\Controllers\IndexController::class,
-        'action'     => 'test',
-        'mode'       => Application::MODE_WEB,
-    ],
-    '/^\/api\/test\/(.\d+)$/i'               => [
-        'method'     => 'get',
-        'controller' => \App\Controllers\Api\ApiController::class,
-        'action'     => 'test',
-        'mode'       => Application::MODE_API,
-    ],
-    '/^\/api\/index$/i'                      => [
-        'method'     => 'get',
-        'controller' => \App\Controllers\Api\ApiController::class,
-        'action'     => 'index',
-        'mode'       => Application::MODE_API,
-    ],
+    new Route('/^\/$/', \App\Controllers\IndexController::class, 'get', 'index'),
+    new Route('/^\/test\/(.\d+)\/(.\d+)\/(.\d+)\/?$/i', \App\Controllers\IndexController::class, 'get', 'test'),
+    new Route('/^\/api\/test\/(.\d+)$/i', \App\Controllers\Api\ApiController::class, 'get', 'test'),
+    new Route('/^\/api\/index$/i', \App\Controllers\Api\ApiController::class, 'get', 'index'),
 ];

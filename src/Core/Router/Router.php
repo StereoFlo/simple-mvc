@@ -87,8 +87,8 @@ class Router
         foreach ($this->collection->getRoutes() as $route) {
             if (\preg_match($route->getPath(), $this->requestedData->getUri(), $matches)) {
                 $this->route = $route;
-                unset($matches[0]);
                 $this->params = $matches;
+                unset($matches[0]);
                 break;
             }
         }
