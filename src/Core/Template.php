@@ -11,12 +11,6 @@ use App\Utils;
 class Template
 {
     /**
-     * Hash for loaded views
-     * @var array
-     */
-    protected static $loadedViews = [];
-
-    /**
      * @param $viewName
      * @param array $params
      *
@@ -30,13 +24,11 @@ class Template
         if (!\file_exists($filePath)) {
             throw new \Exception($filePath . ' template file is not exists');
         }
-        foreach ($params as $var => $val) {
-            $$var = $val;
-        }
-        if (empty(self::$loadedViews[\md5($filePath)])) {
-            self::$loadedViews[\md5($filePath)] = require_once $filePath;
-            return self::$loadedViews[\md5($filePath)];
-        }
-        return self::$loadedViews[\md5($filePath)];
+        \ob_start();
+        \extract($params);
+        require_once $filePath;
+        $template = \ob_get_contents();
+        \ob_end_clean();
+        return $template;
     }
 }
