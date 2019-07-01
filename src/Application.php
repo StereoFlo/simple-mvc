@@ -75,17 +75,17 @@ class Application
             $this->checkRouteMethod();
             $this->checkControllerFile();
             $this->checkCallable();
-            $controller = new \ReflectionClass($this->router->getRoute()->getController());
+            $controller = new ReflectionClass($this->router->getRoute()->getController());
             $params     = $this->di($this->router->getRoute()->getController(), $this->router->getRoute()->getAction());
             $class      = $controller->newInstanceArgs($this->getMethodParams($controller));
 
-            $response = \call_user_func_array([$class, $this->router->getRoute()->getAction()], $params);
+            $response = call_user_func_array([$class, $this->router->getRoute()->getAction()], $params);
             if (!($response instanceof ResponseInterface)) {
                 throw new RuntimeException('controller methods must return instance of ResponseInterface', 500);
             }
             $response->send();
             return;
-        } catch (\Throwable $t) {
+        } catch (Throwable $t) {
             Logger::logToFile($t->getCode() . ': ' . $t->getMessage());
             Response::create($t->getMessage(), $t->getCode())->send();
             return;
@@ -111,21 +111,21 @@ class Application
     private function di(string $controller, string $action): array
     {
         $result = [];
-        $method = new \ReflectionMethod($controller, $action);
+        $method = new ReflectionMethod($controller, $action);
         $params = $method->getParameters();
         if (empty($params)) {
             return [];
         }
         foreach ($params as $param) {
             if (!$param->getType()->isBuiltin()) {
-                if (!\is_callable($param->getType()->getName(), '__constructor')) {
+                if (!is_callable($param->getType()->getName(), '__constructor')) {
                     throw new RuntimeException('parameter is not callable!', 500);
                 }
                 if (null === $this->container->get($param->getType()->getName())) {
                     $this->container->set($param->getType()->getName());
                 }
                 $result[$param->getPosition()] = $this->container->get($param->getType()->getName());
-                $result = \array_merge($result, $this->router->getParams());
+                $result = array_merge($result, $this->router->getParams());
             }
         }
         return $result;
@@ -137,7 +137,7 @@ class Application
      */
     private function checkControllerFile(): void
     {
-        if (!\file_exists($this->getControllerPath())) {
+        if (!file_exists($this->getControllerPath())) {
             throw new ResourceNotFoundException('file doesnot found', 404);
         }
     }
@@ -170,18 +170,18 @@ class Application
      */
     private function checkCallable(): void
     {
-        if (!\is_callable($this->router->getRoute()->getController(), $this->router->getRoute()->getAction())) {
+        if (!is_callable($this->router->getRoute()->getController(), $this->router->getRoute()->getAction())) {
             throw new RuntimeException('controller is not callable!', 500);
         }
     }
 
     /**
-     * @param \ReflectionClass $ref
+     * @param ReflectionClass $ref
      *
      * @return array
      * @throws ReflectionException
      */
-    private function getMethodParams(\ReflectionClass $ref): array
+    private function getMethodParams(ReflectionClass $ref): array
     {
         $resolveConstructorParams = [];
         if (!empty($ref->getConstructor())) {
